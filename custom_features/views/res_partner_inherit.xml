@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <!-- Inherit the Partner form view -->
+        <record id="view_partner_form_inherit_ice" model="ir.ui.view">
+            <field name="name">res.partner.form.inherit.ice</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_partner_form"/>
+            <field name="arch" type="xml">
+                <!-- Locate the VAT field and modify its label -->
+                <xpath expr="//field[@name='vat']" position="attributes">
+                    <attribute name="string">ICE</attribute>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>
