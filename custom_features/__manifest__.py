@@ -8,6 +8,7 @@
         'views/report_templates.xml',
         'views/report_invoice.xml',
         'views/res_partner_inherit.xml',
+        'views/purchase_order_template.xml',
     ],
     'installable': True,
     'application': True,
