@@ -215,30 +215,31 @@
             <xpath expr="//div[@id='informations']" position="replace">
                 <div class="row mt-4 mb-2" id="informations">
                     <div t-if="doc.client_order_ref" class="col-auto col-3 mw-100 mb-2" name="informations_reference">
-                        <strong>Your Reference:</strong><br/>
+                        <strong>Votre référence:</strong><br/>
                         <span class="m-0" t-field="doc.client_order_ref">SO0000</span>
                     </div>
                     <div t-if="doc.date_order" class="col-auto col-3 mw-100 mb-2" name="informations_date">
-                        <strong t-if="doc.state in ['draft', 'sent']">Quotation Date:</strong>
-                        <strong t-else="">Order Date:</strong><br/>
+                        <strong t-if="doc.state in ['draft', 'sent']">Date du devis:</strong>
+                        <strong t-else="">Date de la commande:</strong><br/>
                         <span class="m-0" t-field="doc.date_order" t-options='{"widget": "date"}'>2023-12-31</span>
                     </div>
                     <div t-if="doc.validity_date and doc.state in ['draft', 'sent']"
                         class="col-auto col-3 mw-100 mb-2"
                         name="expiration_date">
-                        <strong>Expiration:</strong><br/>
+                        <strong>Échéance:</strong><br/>
                         <span class="m-0" t-field="doc.validity_date">2023-12-31</span>
                     </div>
                     <div t-if="doc.user_id.name" class="col-auto col-3 mw-100 mb-2">
-                        <strong>Salesperson:</strong><br/>
+                        <strong>Vendeur:</strong><br/>
                         <span class="m-0" t-field="doc.user_id">Mitchell Admin</span>
                     </div>
                     <div t-if="doc.payment_term_id" class="col-auto col-3 mw-100 mb-2">
-                        <strong>Payment Terms:</strong><br/>
+                        <strong>Conditions de règlement:</strong><br/>
                         <span class="m-0" t-field="doc.payment_term_id.name">30 Days</span>
                     </div>
                 </div>
-            </xpath>            <xpath expr="//p[@t-if='not is_html_empty(doc.payment_term_id.note)']" position="replace">
+            </xpath>            
+            <xpath expr="//p[@t-if='not is_html_empty(doc.payment_term_id.note)']" position="replace">
 
             </xpath>
         </template>

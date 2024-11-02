@@ -328,30 +328,30 @@
             <xpath expr="//div[@id='informations']" position="replace">
                 <div id="informations" class="row mt-3 mb-1">
                     <div t-attf-class="#{'col-auto col-3 mw-100' if report_type != 'html' else 'col'} mb-2" t-if="o.invoice_date" name="invoice_date">
-                        <t t-if="o.move_type == 'out_invoice'"><strong>Invoice Date:</strong></t>
-                        <t t-elif="o.move_type == 'out_refund'"><strong>Credit Note Date:</strong></t>
-                        <t t-elif="o.move_type == 'out_receipt'"><strong>Receipt Date:</strong></t>
+                        <t t-if="o.move_type == 'out_invoice'"><strong>Date de la facture:</strong></t>
+                        <t t-elif="o.move_type == 'out_refund'"><strong>Date de la note de crédit:</strong></t>
+                        <t t-elif="o.move_type == 'out_receipt'"><strong>Date de réception:</strong></t>
                         <t t-else=""><strong>Date:</strong></t><br/>
                         <span t-field="o.invoice_date">2023-09-12</span>
                     </div>
                     <div t-attf-class="#{'col-auto col-3 mw-100' if report_type != 'html' else 'col'} mb-2" t-if="o.invoice_date_due and o.move_type == 'out_invoice' and o.state == 'posted'" name="due_date">
-                        <strong>Due Date:</strong><br/>
+                        <strong>Date d'échéance:</strong><br/>
                         <span t-field="o.invoice_date_due">2023-10-31</span>
                     </div>
                     <div t-attf-class="#{'col-auto col-3 mw-100' if report_type != 'html' else 'col'} mb-2" t-if="o.delivery_date" name="delivery_date">
-                        <strong>Delivery Date:</strong><br/>
+                        <strong>La date de livraison:</strong><br/>
                         <span t-field="o.delivery_date">2023-09-25</span>
                     </div>
                     <div t-attf-class="#{'col-auto col-3 mw-100' if report_type != 'html' else 'col'} mb-2" t-if="o.invoice_origin" name="origin">
-                        <strong>Source:</strong><br/>
+                        <strong>Origine:</strong><br/>
                         <span t-field="o.invoice_origin">SO123</span>
                     </div>
                     <div t-attf-class="#{'col-auto col-3 mw-100' if report_type != 'html' else 'col'} mb-2" t-if="o.partner_id.ref" name="customer_code">
-                        <strong>Customer Code:</strong><br/>
+                        <strong>Code client:</strong><br/>
                         <span t-field="o.partner_id.ref"/>
                     </div>
                     <div t-attf-class="#{'col-auto col-3 mw-100' if report_type != 'html' else 'col'} mb-2" t-if="o.ref" name="reference">
-                        <strong>Reference:</strong><br/>
+                        <strong>Référence:</strong><br/>
                         <span t-field="o.ref">INV/2023/00001</span>
                     </div>
                     <div t-attf-class="#{'col-auto col-3 mw-100' if report_type != 'html' else 'col'} mb-2" t-if="o.invoice_incoterm_id" name="incoterm_id">
@@ -363,7 +363,7 @@
                         <span t-else="" t-field="o.invoice_incoterm_id.code" class="m-0"/>
                     </div>
                     <div t-if="o.invoice_payment_term_id" class="col-auto col-3 mw-100 mb-2">
-                        <strong>Payment Terms:</strong><br/>
+                        <strong>Conditions de paiement:</strong><br/>
                         <span class="m-0" t-field="o.invoice_payment_term_id.name">30 Days</span>
                     </div>
                 </div>
