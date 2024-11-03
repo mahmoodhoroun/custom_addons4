@@ -372,6 +372,14 @@
 
             <xpath expr="//div[@class='mb-3'][span/@id='payment_terms_note_id']" position="replace">
             </xpath>
+            <xpath expr="//th[@name='th_taxes']" position="replace">
+            </xpath>
+            <xpath expr="//td[@name='td_taxes']" position="replace">
+            </xpath>
+            <xpath expr="//th[@name='th_priceunit']" position="replace">
+                <th name="th_priceunit" t-attf-class="text-end {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}"><span>PRIX HT</span></th>
+            </xpath>
+
 
         </template>
 

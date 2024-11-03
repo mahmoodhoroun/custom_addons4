@@ -13,6 +13,13 @@
                     </div>
                 </t>
             </xpath>
+            <xpath expr="//th[@name='th_taxes']" position="replace">
+            </xpath>
+            <xpath expr="//td[@name='td_taxes']" position="replace">
+            </xpath>
+<!--            <xpath expr="//th[@name='th_quantity']" position="replace">-->
+<!--                 <th name="th_quantity" class="text-end"><span>PRIX HT</span></th>-->
+<!--            </xpath>-->
         </template>
         <template id="report_purchasequotation_document_inherit" inherit_id="purchase.report_purchasequotation_document">
               <xpath expr="//t[@t-set='address']" position="replace">
@@ -28,6 +35,13 @@
                     </t>
 
               </xpath>
+<!--            <xpath expr="//th[@name='th_taxes']" position="replace">-->
+<!--            </xpath>-->
+<!--            <xpath expr="//td[@name='td_taxes']" position="replace">-->
+<!--            </xpath>-->
+<!--            <xpath expr="//th[@name='th_quantity']" position="replace">-->
+<!--                 <th name="th_quantity" class="text-end"><span>PRIX HT</span></th>-->
+<!--            </xpath>-->
         </template>
     </data>
 </odoo>
