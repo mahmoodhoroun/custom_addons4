@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<odoo>
+
+    <record id="res_partner_form_view_inherit" model="ir.ui.view">
+        <field name="name">res.partner.view.inherit</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+           <xpath expr="//field[@name='vat']" position="replace">
+                <field name="cin" />
+            </xpath>
+            <xpath expr="//page[@name='contact_addresses']" position="after">
+
+                <page name="identifiants_fiscaux" string="Identifiants Fiscaux"
+                      >
+                    <group name="container_row_2">
+
+                        <group name="identifiant">
+                            <field name="rc" />
+                            <field name="tp" />
+                            <field name="iff" />
+
+                            <field name="cnss" />
+                            <field name="ice" />
+                            <field name="capital" />
+
+                        </group>
+                    </group>
+                </page>
+
+            </xpath>
+
+            
+
+
+
+        </field>
+    </record>
+
+
+    <record id="res_company_form_view_inherit" model="ir.ui.view">
+        <field name="name">res.company.view.inherit</field>
+        <field name="model">res.company</field>
+        <field name="inherit_id" ref="base.view_company_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//page[@name='general_info']" position="after">
+
+                <page name="identifiants_fiscaux" string="Identifiants Fiscaux">
+                    <group name="container_row_2">
+
+                        <group name="identifiant">
+                            <field name="rc"/>
+                            <field name="tp"/>
+                            <field name="iff"/>
+                            <field name="cnss"/>
+                            <field name="ice"/>
+                            <field name="capital"/>
+
+                        </group>
+                    </group>
+                </page>
+
+            </xpath>
+
+
+        </field>
+    </record>
+
+
+</odoo>
