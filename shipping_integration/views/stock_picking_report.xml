@@ -1,0 +1,26 @@
+<odoo>
+    <template id="delivery_pdf_template">
+        <t t-call="web.external_layout">
+            <div class="page">
+                <t t-set="pdf_data" t-value="object.action_generate_delivery_pdf()"/>
+                <t t-if="pdf_data">
+                    <iframe t-att-src="'data:application/pdf;base64,' + pdf_data.encode('base64')" width="100%" height="1000px"/>
+                </t>
+                <t t-else="">
+                    <p>PDF could not be generated. Please check the logs.</p>
+                </t>
+            </div>
+        </t>
+    </template>
+
+    <record id="action_delivery_pdf_report" model="ir.actions.report">
+        <field name="name">Cathedis Delivery PDF</field>
+        <field name="model">stock.picking</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">shipping_integration.delivery_pdf_template</field>
+        <field name="report_file">shipping_integration.delivery_pdf_template</field>
+        <field name="binding_model_id" ref="stock.model_stock_picking"/>
+        <field name="binding_type">report</field>
+        <field name="print_report_name">'Delivery_PDF_' + object.name</field>
+    </record>
+</odoo>
