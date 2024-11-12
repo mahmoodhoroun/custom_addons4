@@ -16,14 +16,21 @@ class StockPicking(models.Model):
     paymentType = fields.Char(string="Payment Type", default="ESPECES")
     caution = fields.Char(string="Caution", default="0")
     fragile = fields.Char(string="Fragile", default="0")
+    allowOpening = fields.Char(string="Allow Opening", default="1")
     rangeWeight = fields.Selection(selection=[
             ("ONE_FIVE", "Between 1Kg and 5Kg"),
             ("SIX_TEN", "Between 6Kg and 10Kg"),
             ("ELEVEN_TWENTY_NINE", "Between 11Kg and 29Kg"),
             ('MORE_30', 'More than 30Kg'),],string="Range Weight", default="ONE_FIVE")
+    new_state = fields.Selection(
+        selection=[('delivered', 'Delivered'),
+                    ('delivery_print', 'Delivery Printed'),
+                    ('delivery_pickup', 'Delivery Picked Up')])
 
     def call_shipping_api(self):
         for rec in self:
+            if rec.caution not in ['0', '1'] and rec.fragile not in ['0', '1'] and rec.allowOpening not in ['0', '1']:
+                raise UserError("Make sure that Caution, Fragile and Allow Opening is 0 or 1")
             # print(self.caution)
             # print(self.caution)
             # print(self.caution)
@@ -51,15 +58,15 @@ class StockPicking(models.Model):
                                 "fragile": rec.fragile,
                                 "declaredValue": str(rec.sale_id.amount_total),
                                 "address": rec.partner_id.street or "",
-                                "nomOrder": rec.name,
-                                "comment": "Order from Odoo",
+                                "nomOrder": rec.sale_id.name,
+                                "comment": "",
                                 "rangeWeight": str(rec.rangeWeight),
                                 "subject": rec.subject,
                                 "paymentType": rec.paymentType,
                                 "deliveryType": "Livraison CRBT",
                                 "packageCount": "1",
-                                "allowOpening": "0",
-                                "tags": "API"
+                                "allowOpening": rec.allowOpening,
+                                "tags": ""
                             }
                         }
                     }
@@ -80,6 +87,7 @@ class StockPicking(models.Model):
                     if delivery_id:
                         rec.delivery_id = str(delivery_id)  # Store the delivery ID in the field
                         _logger.info("API call successful. Delivery ID: %s", delivery_id)
+                        rec.new_state = 'delivered'
                     else:
                         _logger.warning("Delivery ID not found in the response.")
                         _logger.info("*****************************")
@@ -124,6 +132,8 @@ class StockPicking(models.Model):
             pdf_path = response_data.get("data", [{}])[0].get("view", {}).get("views", [{}])[0].get("name")
             if pdf_path:
                 pdf_url = f"https://api.cathedis.delivery/{pdf_path}"
+                for rec in self:
+                    rec.new_state = 'delivery_print'
                 return {
                     'type': 'ir.actions.act_url',
                     'url': pdf_url,
@@ -140,6 +150,7 @@ class StockPicking(models.Model):
         ids = []
         for rec in self:
             ids.append(int(rec.delivery_id))
+            rec.new_state = 'delivery_print'
 
         # Retrieve cookies from system parameters
         jsessionid = self.env['ir.config_parameter'].sudo().get_param('shipping_api.jsessionid')
@@ -174,6 +185,8 @@ class StockPicking(models.Model):
         if response.status_code == 200:
             response_data = response.json()
             if response_data.get("status") == 0:
+                for rec in self:
+                    rec.new_state = 'delivery_print'
                 return response_data  # Successful response
             else:
                 raise UserError(f"API Error: {response_data}")

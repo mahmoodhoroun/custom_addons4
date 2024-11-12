@@ -10,11 +10,14 @@
                 <button name="action_generate_delivery_pdf" type="object" string="Delivery Voucher4×4" class="btn-primary"/>
             </xpath>
             <xpath expr="//sheet/group/group[1]" position="inside">
+                <field name="new_state" optional="show" widget="badge" readonly="1"/>
                 <field name="delivery_id" readonly="1" invisible="picking_type_id.code == 'outgoing'"/>
                 <field name="subject" invisible="picking_type_id.code == 'outgoing'"/>
                 <field name="paymentType" invisible="picking_type_id.code == 'outgoing'"/>
                 <field name="caution" invisible="picking_type_id.code == 'outgoing'"/>
                 <field name="fragile" invisible="picking_type_id.code == 'outgoing'"/>
+                <field name="allowOpening" invisible="picking_type_id.code == 'outgoing'"/>
+
                 <field name="rangeWeight" invisible="picking_type_id.code == 'outgoing'"/>
 
             </xpath>
@@ -27,9 +30,13 @@
         <field name="inherit_id" ref="stock.vpicktree"/>
         <field name="arch" type="xml">
             <xpath expr="//header" position="inside">
-                <button name="action_generate_delivery_pdf" type="object" string="Delivery Voucher4×4" class="btn-primary" />
                 <button name="call_shipping_api" type="object" string="Add to Delivery" class="btn-primary" />
+                <button name="action_generate_delivery_pdf" type="object" string="Delivery Voucher4×4" class="btn-primary" />
                 <button name="action_refresh_pickup_request" type="object" string="Create/Update pickup request" class="btn-primary" />
+
+            </xpath>
+            <xpath expr="//field[@name='state']" position="after">
+                <field name="new_state" optional="show" widget="badge" />
 
             </xpath>
         </field>

@@ -5,7 +5,6 @@
     'data': [
         'data/ir_cron_data.xml',
         'views/stock_picking_views.xml',
-        'views/stock_picking_report.xml',
              ],
     'installable': True,
 }
