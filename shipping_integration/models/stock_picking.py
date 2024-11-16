@@ -23,9 +23,11 @@ class StockPicking(models.Model):
             ("ELEVEN_TWENTY_NINE", "Between 11Kg and 29Kg"),
             ('MORE_30', 'More than 30Kg'),],string="Range Weight", default="ONE_FIVE")
     new_state = fields.Selection(
-        selection=[('delivered', 'Delivered'),
+        selection=[('delivered', 'Sent to Cathedis'),
                     ('delivery_print', 'Delivery Printed'),
                     ('delivery_pickup', 'Delivery Picked Up')])
+
+    print = fields.Boolean(string="Print", default=False)
 
     def call_shipping_api(self):
         for rec in self:
@@ -131,9 +133,9 @@ class StockPicking(models.Model):
             print(response.text)
             pdf_path = response_data.get("data", [{}])[0].get("view", {}).get("views", [{}])[0].get("name")
             if pdf_path:
-                pdf_url = f"https://api.cathedis.delivery/{pdf_path}"
                 for rec in self:
-                    rec.new_state = 'delivery_print'
+                    rec.print = True
+                pdf_url = f"https://api.cathedis.delivery/{pdf_path}"
                 return {
                     'type': 'ir.actions.act_url',
                     'url': pdf_url,
@@ -186,7 +188,7 @@ class StockPicking(models.Model):
             response_data = response.json()
             if response_data.get("status") == 0:
                 for rec in self:
-                    rec.new_state = 'delivery_print'
+                    rec.new_state = 'delivery_pickup'
                 return response_data  # Successful response
             else:
                 raise UserError(f"API Error: {response_data}")
