@@ -3,7 +3,7 @@ import logging
 
 class Picking(models.Model):
     _inherit = 'stock.picking'
-
+    sale_id = fields.Many2one('sale.order', string="Sale Order", ondelete='cascade')
 
     # def _create_returns(self):
     #     result = super(ReturnPicking, self)._create_returns()

@@ -1,0 +1,25 @@
+<odoo>
+    <record id="view_mrp_bom_form_inherit" model="ir.ui.view">
+        <field name="name">mrp.bom.form.inherit</field>
+        <field name="model">mrp.bom</field>
+        <field name="inherit_id" ref="mrp.mrp_bom_form_view" />
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="Additional Products">
+                    <field name="additional_product_ids">
+                        <tree editable="bottom">
+                            <field name="product_id" />
+                            <field name="quantity" />
+                        </tree>
+                    </field>
+                </page>
+            </xpath>
+            <xpath expr="//div[@class='o_row']" position="after">
+
+                <field name="from_products" />
+                <field name="receive_products" />
+            </xpath>
+
+        </field>
+    </record>
+</odoo>
