@@ -86,6 +86,8 @@ class SaleOrder(models.Model):
         }
 
         picking = self.env['stock.picking'].create(picking_vals)
+        picking.action_assign()
+
         return picking
 
     def action_view_receipts(self):

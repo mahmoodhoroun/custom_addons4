@@ -5,7 +5,7 @@
         <field name="inherit_id" ref="mrp.mrp_bom_form_view" />
         <field name="arch" type="xml">
             <xpath expr="//notebook" position="inside">
-                <page string="Additional Products">
+                <page string="Extracted items">
                     <field name="additional_product_ids">
                         <tree editable="bottom">
                             <field name="product_id" />

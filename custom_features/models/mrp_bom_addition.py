@@ -25,7 +25,7 @@ class MrpBom(models.Model):
         """
         return self.env.ref('stock.stock_location_customers', raise_if_not_found=False)
     additional_product_ids = fields.One2many(
-        'mrp.bom.addition', 'bom_id', string="Additional Products"
+        'mrp.bom.addition', 'bom_id', string="Extracted items"
     )
 
 
