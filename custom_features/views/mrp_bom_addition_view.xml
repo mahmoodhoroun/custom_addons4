@@ -14,11 +14,11 @@
                     </field>
                 </page>
             </xpath>
-            <xpath expr="//div[@class='o_row']" position="after">
+<!--            <xpath expr="//div[@class='o_row']" position="after">-->
 
-                <field name="from_products" />
-                <field name="receive_products" />
-            </xpath>
+<!--                <field name="from_products" />-->
+<!--                <field name="receive_products" />-->
+<!--            </xpath>-->
 
         </field>
     </record>
