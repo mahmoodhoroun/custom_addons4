@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Inheriting from the form view of the delivery_carrier model to extend it -->
+    <record id="view_delivery_carrier_form" model="ir.ui.view">
+        <field name="name">delivery.carrier.view.form.inherit.woo.commerce.connector</field>
+        <field name="model">delivery.carrier</field>
+        <field name="inherit_id" ref="delivery.view_delivery_carrier_form"/>
+        <field name="arch" type="xml">
+            <!-- Inserting new fields after the existing 'destination' page -->
+            <xpath expr="//page[@name='destination']" position="after">
+                <page name="woo_commerce_info" string="WooCommerce Info">
+                    <group>
+                        <group>
+                            <field name="woo_id"/>
+                            <field name="instance_id"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>
