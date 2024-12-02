@@ -31,7 +31,7 @@ class SaleOrder(models.Model):
                 for additional_product in bom.additional_product_ids:
                     additional_products.append({
                         'product_id': additional_product.product_id.id,
-                        'quantity': additional_product.quantity * self.order_line.product_uom_qty,
+                        'quantity': additional_product.quantity * line.product_uom_qty,
                         'uom_id': additional_product.product_id.uom_id.id,
                         'name': additional_product.product_id.display_name,
                     })

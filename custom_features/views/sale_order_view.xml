@@ -11,6 +11,23 @@
             </xpath>
         </field>
     </record>
+    <record id="view_sale_order_filter_custom" model="ir.ui.view">
+        <field name="name">sale.order.filter.custom</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_sales_order_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//search" position="inside">
+                <filter
+                    name="filter_woo"
+                    string="Wordpress order"
+                    domain="[('name', '=ilike', 'WOO_%')]"/>
+                <filter
+                    name="filter_s"
+                    string="odoo order"
+                    domain="[('name', '=ilike', 'S%')]"/>
 
+            </xpath>
+        </field>
+    </record>
 
 </odoo>
