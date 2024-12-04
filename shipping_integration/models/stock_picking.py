@@ -3,11 +3,13 @@ import json
 from odoo import models, fields, api
 import logging
 import base64
-
+import os
 from odoo.exceptions import UserError
+from odoo.modules.module import get_module_resource
+from werkzeug.urls import url_encode
 
+delivery_counter = 1
 _logger = logging.getLogger(__name__)
-
 class StockPicking(models.Model):
     _inherit = 'stock.picking'
 
@@ -100,6 +102,75 @@ class StockPicking(models.Model):
                     _logger.error("API call failed with status %s: %s", response.status_code, response.text)
                     raise ValueError("Delivery ID not found in the response.%s: %s", response.status_code, response.text)
 
+    def action_generate_delivery_pdf(self):
+        ids = [int(rec.delivery_id) for rec in self]
+        global delivery_counter
+
+        # Fetch the authentication cookies
+        jsessionid = self.env['ir.config_parameter'].sudo().get_param('shipping_api.jsessionid')
+        csrf_token = self.env['ir.config_parameter'].sudo().get_param('shipping_api.csrf_token')
+        addons_path = '/opt/odoo17/odoo17-custom-addons'
+
+        # Validate the required configuration parameters
+        if not jsessionid or not csrf_token:
+            raise UserError(
+                "Authentication cookies are missing. Please ensure the scheduled authentication is running correctly.")
+        if not addons_path:
+            raise UserError("The addons_path is not configured in the Odoo settings or configuration file.")
+
+        # Prepare the payload and headers for the API call
+        url = "https://api.cathedis.delivery/ws/action"
+        payload = {
+            "action": "delivery.print.bl4x4",
+            "data": {
+                "context": {
+                    "_ids": ids,
+                    "_model": "com.tracker.delivery.db.Delivery",
+                }
+            },
+        }
+        headers = {
+            'Content-Type': 'application/json',
+            'Cookie': f'CSRF-TOKEN={csrf_token}; JSESSIONID={jsessionid}',
+        }
+        response = requests.post(url, json=payload, headers=headers)
+
+        if response.status_code == 200:
+            response_data = response.json()
+            pdf_path = response_data.get("data", [{}])[0].get("view", {}).get("views", [{}])[0].get("name")
+            if pdf_path:
+                # Fetch and save the PDF
+                pdf_url = f"https://api.cathedis.delivery/{pdf_path}"
+                pdf_response = requests.get(pdf_url, stream=True, headers=headers)
+
+                # Define the path to save the PDF
+                media_dir = os.path.join(addons_path.split(',')[0], 'shipping_integration/static/media')
+                os.makedirs(media_dir, exist_ok=True)
+                file_name = f"delivery_{delivery_counter}.pdf"
+                file_path = os.path.join(media_dir, file_name)
+                file_path2 = os.path.join("shipping_integration/static/media", file_name)
+                print("*************************************")
+                print(file_path)
+                delivery_counter += 1
+
+                # Save the file
+                with open(file_path, 'wb') as pdf_file:
+                    for chunk in pdf_response.iter_content(chunk_size=1024):
+                        pdf_file.write(chunk)
+
+                for rec in self:
+                    rec.print = True
+
+                return {
+                    'type': 'ir.actions.act_url',
+                    'url': file_path2,
+                    'target': 'new',
+                }
+            else:
+                raise UserError("PDF URL not found in the response.")
+        else:
+            raise UserError(f"Failed to fetch PDF URL with status code: {response.status_code}")
+
 
     def action_generate_delivery_pdf(self):
         # self.ensure_one()
@@ -145,7 +216,6 @@ class StockPicking(models.Model):
                 raise UserError("PDF URL not found in the response.")
         else:
             raise UserError(f"Failed to fetch PDF URL with status code: {response.status_code}")
-
 
 
     def action_refresh_pickup_request(self):
