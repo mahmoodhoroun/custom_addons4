@@ -172,52 +172,6 @@ class StockPicking(models.Model):
             raise UserError(f"Failed to fetch PDF URL with status code: {response.status_code}")
 
 
-    def action_generate_delivery_pdf(self):
-        # self.ensure_one()
-        ids = []
-        for rec in self:
-            ids.append(int(rec.delivery_id))
-        jsessionid = self.env['ir.config_parameter'].sudo().get_param('shipping_api.jsessionid')
-        csrf_token = self.env['ir.config_parameter'].sudo().get_param('shipping_api.csrf_token')
-        if not jsessionid or not csrf_token:
-            raise UserError(
-                "Authentication cookies are missing. Please ensure the scheduled authentication is running correctly.")
-
-        url = "https://api.cathedis.delivery/ws/action"
-        payload = {
-            "action": "delivery.print.bl4x4",
-            "data": {
-                "context": {
-                    "_ids": ids,  # Ensure `delivery_id` is an integer
-                    "_model": "com.tracker.delivery.db.Delivery"
-                }
-            }
-        }
-        headers = {
-            'Content-Type': 'application/json',
-            'Cookie': f'CSRF-TOKEN={csrf_token}; JSESSIONID={jsessionid}'
-        }
-        response = requests.post(url, json=payload, headers=headers)
-
-        if response.status_code == 200:
-            response_data = response.json()
-            print(response.text)
-            pdf_path = response_data.get("data", [{}])[0].get("view", {}).get("views", [{}])[0].get("name")
-            if pdf_path:
-                for rec in self:
-                    rec.print = True
-                pdf_url = f"https://api.cathedis.delivery/{pdf_path}"
-                return {
-                    'type': 'ir.actions.act_url',
-                    'url': pdf_url,
-                    'target': 'new',
-                }
-            else:
-                raise UserError("PDF URL not found in the response.")
-        else:
-            raise UserError(f"Failed to fetch PDF URL with status code: {response.status_code}")
-
-
     def action_refresh_pickup_request(self):
         ids = []
         for rec in self:
