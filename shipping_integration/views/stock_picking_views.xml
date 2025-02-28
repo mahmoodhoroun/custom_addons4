@@ -37,7 +37,7 @@
             </xpath>
             <xpath expr="//field[@name='state']" position="after">
                 <field name="new_state" optional="show" widget="badge" string="Fulfillment"/>
-                <field name="print" optional="show" widget="badge"/>
+                <field name="print" optional="show" widget="boolean"/>
             </xpath>
         </field>
     </record>

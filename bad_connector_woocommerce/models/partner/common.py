@@ -57,13 +57,13 @@ class ResPartner(models.Model):
         state_record = self.env["res.country.state"].search(
             [("code", "=", state), ("country_id", "=", country_record.id)], limit=1
         )
-        if state and not state_record:
-            raise MappingError(
-                _(
-                    f"State code '{state}' not found in Odoo records for "
-                    "country '{country}'."
-                )
-            )
+        #if state and not state_record:
+        #    raise MappingError(
+        #        _(
+        #            f"State code '{state}' not found in Odoo records for "
+        #            "country '{country}'."
+        #        )
+        #    )
         vals = {
             "name": data.get("username", "")
             or data.get("first_name", "")
@@ -80,8 +80,8 @@ class ResPartner(models.Model):
             "zip": data.get("postcode"),
             "phone": data.get("phone"),
             "country_id": country_record.id if country_record else False,
-            "state_id": state_record.id if state_record else False,
-            "city": data.get("city"),
+            #"state_id": state_record.id if state_record else False,
+            "city": data.get("state"),
         }
         return vals
 
@@ -123,7 +123,7 @@ class ResPartner(models.Model):
         billing = record.get("billing")
         shipping = record.get("shipping")
         child_data = []
-        for data, address_type in [(billing, "invoice"), (shipping, "delivery")]:
+        for data, address_type in [(billing, "invoice")]:
             if not any(data.values()):
                 continue
             if (

@@ -5,6 +5,8 @@ from odoo import api, fields, models
 
 from odoo.addons.component.core import Component
 from odoo.addons.component_event import skip_if
+import base64
+import requests
 
 from ...components import utils
 
@@ -22,6 +24,20 @@ class ProductProduct(models.Model):
     )
     stock_manage = fields.Boolean(compute="_compute_stock_manage")
     backend_stock_manage = fields.Boolean(compute="_compute_backend_stock_manage")
+
+    def process_old_record_image(self):
+        for product in self:
+            if not product.woo_bind_ids:
+                continue
+            if not product.woo_bind_ids[0].woo_product_image_url_ids:
+                continue
+            image_url = product.woo_bind_ids[0].woo_product_image_url_ids[0].url
+            response = requests.get(image_url)
+            if response.status_code != 200:
+                continue
+            binary_image = response._content
+            binary_data = base64.b64encode(binary_image).decode("utf-8")
+            product.write({"image_1920": binary_data})
 
     def update_stock_qty(self):
         """

@@ -7,6 +7,8 @@ import os
 from odoo.exceptions import UserError
 from odoo.modules.module import get_module_resource
 from werkzeug.urls import url_encode
+import pexpect
+
 
 delivery_counter = 1
 _logger = logging.getLogger(__name__)
@@ -109,14 +111,13 @@ class StockPicking(models.Model):
         # Fetch the authentication cookies
         jsessionid = self.env['ir.config_parameter'].sudo().get_param('shipping_api.jsessionid')
         csrf_token = self.env['ir.config_parameter'].sudo().get_param('shipping_api.csrf_token')
-        addons_path = '/opt/odoo17/odoo17-custom-addons'
+        media_dir = '/mnt/extra-addons/shipping_integration/static/media'
 
         # Validate the required configuration parameters
         if not jsessionid or not csrf_token:
-            raise UserError(
-                "Authentication cookies are missing. Please ensure the scheduled authentication is running correctly.")
-        if not addons_path:
-            raise UserError("The addons_path is not configured in the Odoo settings or configuration file.")
+            raise UserError("Authentication cookies are missing. Please ensure the scheduled authentication is running correctly.")
+        if not media_dir:
+            raise UserError("The media directory is not properly configured.")
 
         # Prepare the payload and headers for the API call
         url = "https://api.cathedis.delivery/ws/action"
@@ -143,14 +144,12 @@ class StockPicking(models.Model):
                 pdf_url = f"https://api.cathedis.delivery/{pdf_path}"
                 pdf_response = requests.get(pdf_url, stream=True, headers=headers)
 
-                # Define the path to save the PDF
-                media_dir = os.path.join(addons_path.split(',')[0], 'shipping_integration/static/media')
+                # Define the path to save the PDF inside the container
                 os.makedirs(media_dir, exist_ok=True)
                 file_name = f"delivery_{delivery_counter}.pdf"
                 file_path = os.path.join(media_dir, file_name)
-                file_path2 = os.path.join("shipping_integration/static/media", file_name)
-                print("*************************************")
-                print(file_path)
+                file_url = f"/shipping_integration/static/media/{file_name}"
+                
                 delivery_counter += 1
 
                 # Save the file
@@ -158,20 +157,37 @@ class StockPicking(models.Model):
                     for chunk in pdf_response.iter_content(chunk_size=1024):
                         pdf_file.write(chunk)
 
+                # Automate the SSH connection and password entry using pexpect
+                try:
+                    ssh_command = "ssh root@10.19.0.5 'sh /usr/local/bin/move_and_fix_permissions.sh'"
+                    child = pexpect.spawn(ssh_command)
+                    
+                    # Expect the password prompt
+                    child.expect("password:")
+                    # Send the password
+                    child.sendline("newStrongPass123")
+                    # Wait for the command to complete
+                    child.expect(pexpect.EOF)
+                    
+                    # Print the output for debugging (optional)
+                    output = child.before.decode()
+                    print("SSH Output:", output)
+
+                except pexpect.ExceptionPexpect as e:
+                    raise UserError(f"Failed to execute SSH command: {e}")
+
                 for rec in self:
                     rec.print = True
 
                 return {
                     'type': 'ir.actions.act_url',
-                    'url': file_path2,
+                    'url': file_url,
                     'target': 'new',
                 }
             else:
                 raise UserError("PDF URL not found in the response.")
         else:
             raise UserError(f"Failed to fetch PDF URL with status code: {response.status_code}")
-
-
     def action_refresh_pickup_request(self):
         ids = []
         for rec in self:
