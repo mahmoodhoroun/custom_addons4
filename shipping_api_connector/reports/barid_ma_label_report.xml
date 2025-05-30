@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Report template for Barid.ma shipping label -->
+    <template id="report_barid_ma_label">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+            
+                <div class="page" style="width: 100%; height: 100%; padding: 0; margin: 0;">
+                    <div class="row" style="border: 2px solid black; margin: 0; height: 100%;">
+                        <!-- Header with logos -->
+                        <div class="col-12" style="border-bottom: 1px solid black; padding: 5px; text-align: center;">
+                            <div class="row">
+                                <div class="col-12 text-center">
+                                    <img t-att-src="'%s/shipping_api_connector/static/src/img/header.png' % request.httprequest.host_url" style="max-height: 50px; width: 100%;"/>
+                                </div>
+                                
+                            </div>
+                        </div>
+                        
+                        <!-- CAB Number -->
+                        <div class="col-12" style="padding: 5px; text-align: center;">
+                            <strong style="font-size: 24px;">*<t t-esc="o.barid_ma_tracking or 'CAB'"/>*</strong>
+                            <!-- <div t-field="o.barid_ma_tracking" t-options="{'widget': 'barcode', 'symbology': 'auto', 'width': 600, 'height': 150, 'img_style': 'width:100%;height:20%;'}"/> -->
+
+
+                            <div class= "text-center o_label_small_barcode">
+                                <t t-if="o.barid_ma_tracking">
+                                    <!-- `quiet=0` to remove the left and right margins on the barcode -->
+                                    <div t-out="o.barid_ma_tracking" style="padding:0" t-options="{'widget': 'barcode', 'quiet': 0, 'symbology': 'auto', 'img_style': 'width:70mm;height:8.5mm'}"/>
+                                    <!-- <div class="o_label_name" style="height:1.7em;background-color: transparent;">
+                                        <span t-out="o.barid_ma_tracking"/>
+                                    </div> -->
+                                </t>
+                            </div>
+                        </div>
+                        <div style="border-bottom: 1px solid black; padding: 5px;"/>
+
+                        <div>
+                            <div style="float: left; width: 60%; position: relative; min-height: 100px;">
+                                <div>
+                                    <strong>Expediteur:</strong><br/>
+                                    <!-- <span t-esc="o.company_id.name or 'NEXT LEVEL'"/><br/> -->
+                                    <span>SEBINFO</span><br/>
+                                    <span>https://sebinfo.ma/</span><br/>
+                                    <!-- <span t-esc="o.company_id.phone or ''"/> -->
+                                </div>
+                                <div style="position: absolute; bottom: 0; right: 0; border: 1.5px solid black; width: 70px; text-align: center;">
+                                    <span style="font-size: 18px; font-weight: bold;">Rabat</span>
+                                </div>
+                            </div>
+                            <div style="float: right; width: 40%;">
+                                <table style="line-height: 32px; border: 1px solid black; width: 100%; border-collapse: collapse;" >
+                                    <tr style="border: 1px solid black;">
+                                        <td style="border: 1px solid black;"><strong>Date:</strong></td>
+                                        <td style="border: 1px solid black;"><span t-esc="context_timestamp(o.write_date).strftime('%d/%m/%Y')"/></td>
+                                    </tr>
+                                    <tr style="border: 1px solid black;">
+                                        <td style="border: 1px solid black;"><strong>Poids:</strong></td>
+                                        <td style="border: 1px solid black;"><span t-esc="'%.1f' % sum(o.move_line_ids.mapped(lambda x: x.product_id.weight * x.quantity))"/> KG</td>
+                                    </tr>
+                                    <tr style="border: 1px solid black;">
+                                        <td style="border: 1px solid black;"><strong>CRBT:</strong></td>
+                                        <td style="border: 1px solid black;">
+                                            <t t-if="o.crbt_type == 'Cash'">
+                                                <span t-esc="o.sale_id.amount_total if o.sale_id else '0.00'"/> DH
+                                            </t>
+                                            <t t-else="">
+                                                <span>0.00 DH</span>
+                                            </t>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div style="clear: both;"></div>
+                        </div>
+                        
+                        <!-- Recipient info -->
+                        <div>
+                            <div style="border-top: 1px solid black; border-right: 1px solid black; float: left; width: 60%; min-height: 173px; position: relative;">
+                                <div>
+                                    <div style="padding: 5px;">
+                                        <strong>DESTINATAIRE:</strong> <span t-esc="o.partner_id.name"/><br/>
+                                        <strong>Adresse quartier:</strong> <span t-esc="o.partner_id.street or ''"/><br/>
+                                        <strong>Code Postal:</strong> <span t-esc="o.partner_id.zip or ''"/><br/>
+                                        <strong>Telephone:</strong> <span t-esc="o.partner_id.phone or o.partner_id.mobile or ''"/><br/>
+                                        <strong>SMS Destinataire:</strong><br/>
+                                    </div>
+                                    <div style="position: absolute; bottom: 0;">
+                                        <table style="border: 1px solid black; width: 100%; border-collapse: collapse;"> 
+                                            <tr >
+                                                <td style="border: 1px solid black; width: 50%;"><strong>Ville:</strong></td>
+                                                <td style="border: 1px solid black; width: 50%;"><span t-esc="o.partner_id.city or ''"/></td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="float: right; width: 40%; text-align: center;">
+                                <img  t-att-src="'%s/shipping_api_connector/static/src/img/logo.jpeg' % request.httprequest.host_url" style="width: 140px; height: 140px; padding-top: 20px;"/>
+                                
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </t>
+        </t>
+    </template>
+    
+    <!-- Report action definition -->
+    <record id="action_report_barid_ma_label" model="ir.actions.report">
+        <field name="name">Barid.ma Shipping Label</field>
+        <field name="model">stock.picking</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">shipping_api_connector.report_barid_ma_label</field>
+        <field name="report_file">shipping_api_connector.report_barid_ma_label</field>
+        <field name="print_report_name">'Barid.ma Label - %s' % (object.name)</field>
+        <field name="binding_model_id" ref="model_stock_picking"/>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="shipping_api_connector.paperformat_barid_ma_label"/>
+    </record>
+</odoo>

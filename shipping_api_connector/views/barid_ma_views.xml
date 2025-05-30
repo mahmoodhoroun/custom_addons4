@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Barid.ma Connector Form View -->
+    <record id="view_barid_ma_connector_form" model="ir.ui.view">
+        <field name="name">shipping.barid.ma.connector.form</field>
+        <field name="model">shipping.barid.ma.connector</field>
+        <field name="arch" type="xml">
+            <form string="Barid.ma API Connector">
+                <header>
+                    <button name="test_connection" string="Test Connection" type="object" class="oe_highlight"/>
+                    <button name="fetch_site_info" string="Get IdSite" type="object" class="oe_highlight"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="username" placeholder="e.g. 10138713"/>
+                            <field name="password" password="True" placeholder="e.g. @$10138713Seb"/>
+                            <field name="api_url"/>
+                            <field name="id_contract1"/>
+                            <field name="id_contract2"/>
+                            <field name="id_deposit"/>
+                            <field name="id_site"/>
+                        </group>
+                        <group>
+                            <field name="token" readonly="1"/>
+                            <field name="token_expiry" readonly="1"/>
+                            <field name="active"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Barid.ma Connector Tree View -->
+    <record id="view_barid_ma_connector_tree" model="ir.ui.view">
+        <field name="name">shipping.barid.ma.connector.tree</field>
+        <field name="model">shipping.barid.ma.connector</field>
+        <field name="arch" type="xml">
+            <tree string="Barid.ma API Connectors">
+                <field name="name"/>
+                <field name="username"/>
+                <field name="api_url"/>
+                <field name="active"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Barid.ma Connector Action -->
+    <record id="action_barid_ma_connector" model="ir.actions.act_window">
+        <field name="name">Barid.ma Connectors</field>
+        <field name="res_model">shipping.barid.ma.connector</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first Barid.ma API connector
+            </p>
+            <p>
+                Configure your Barid.ma API credentials to connect with the shipping service.
+            </p>
+        </field>
+    </record>
+
+    <!-- Menu Item -->
+    <menuitem id="menu_shipping_api_connector_root" 
+              name="Shipping Connectors" 
+              web_icon="shipping_api_connector,static/description/icon.png"
+              sequence="90"/>
+              
+    <menuitem id="menu_shipping_api_connector_config" 
+              name="Configuration" 
+              parent="menu_shipping_api_connector_root"
+              sequence="100"/>
+              
+    <menuitem id="menu_barid_ma_connector" 
+              name="Barid.ma Connectors" 
+              parent="menu_shipping_api_connector_config"
+              action="action_barid_ma_connector"
+              sequence="10"/>
+</odoo>

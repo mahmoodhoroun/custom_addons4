@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Add Barid.ma fields and button to stock.picking form view -->
+    <record id="view_picking_form_barid_ma" model="ir.ui.view">
+        <field name="name">stock.picking.form.barid.ma</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="arch" type="xml">
+            <!-- Add buttons in header -->
+            <xpath expr="//header" position="inside">
+                <button name="action_create_barid_ma_package" 
+                        string="Create Barid.ma Package" 
+                        type="object" 
+                        class="oe_highlight" 
+                        invisible="picking_type_code != 'outgoing'"/>
+                <button name="action_print_barid_ma_label" 
+                        string="Print Barid.ma Label" 
+                        type="object" 
+                        class="oe_highlight" 
+                        invisible="picking_type_code != 'outgoing'"/>
+                <button name="action_generate_fim" 
+                        string="FIM Generation" 
+                        type="object" 
+                        class="oe_highlight" 
+                        invisible="picking_type_code != 'outgoing'"/>
+            </xpath>
+            
+            <!-- Add Barid.ma fields in the notebook -->
+            <xpath expr="//notebook" position="inside">
+                <page string="Barid.ma Shipping" invisible="picking_type_code != 'outgoing'">
+                    <group>
+                        <group>
+                            <field name="crbt_type"/>
+                            <field name="barid_ma_tracking"/>
+                            <field name="barid_ma_package_id"/>
+                            <field name="barid_ma_contract_id"/>
+                            <field name="barid_ma_fim_generated"/>
+                        </group>
+                        <group>
+                            <field name="barid_ma_id_fim"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+    <!-- Add Barid.ma fields to stock.picking tree view -->
+    <record id="view_picking_tree_barid_ma" model="ir.ui.view">
+        <field name="name">stock.picking.tree.barid.ma</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.vpicktree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='state']" position="after">
+                <field name="barid_ma_tracking" optional="show"/>
+                <field name="barid_ma_contract_id" optional="show"/>
+                <field name="barid_ma_fim_generated" optional="show"/>
+            </xpath>
+        </field>
+    </record>
+    
+    <!-- Add button to tree header -->
+        <record id="view_picking_tree_inherit_barid_ma" model="ir.ui.view">
+        <field name="name">stock.picking.tree.inherit.barid.ma</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.vpicktree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="action_generate_fim" type="object" string="FIM Generation" class="btn-primary" />
+                <button name="create_multiple_packages" type="object" string="Create Barid.ma Package" class="btn-primary" />
+            </xpath>
+        </field>
+    </record>
+</odoo>
