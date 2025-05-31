@@ -23,6 +23,11 @@
                         type="object" 
                         class="oe_highlight" 
                         invisible="picking_type_code != 'outgoing'"/>
+                <button name="action_delete_barid_ma_package" 
+                        string="Delete Barid.ma Package" 
+                        type="object" 
+                        class="btn-secondary" 
+                        invisible="picking_type_code != 'outgoing'"/>
             </xpath>
             
             <!-- Add Barid.ma fields in the notebook -->
@@ -67,6 +72,7 @@
             <xpath expr="//header" position="inside">
                 <button name="action_generate_fim" type="object" string="FIM Generation" class="btn-primary" />
                 <button name="create_multiple_packages" type="object" string="Create Barid.ma Package" class="btn-primary" />
+                <button name="delete_multiple_packages" type="object" string="Delete Barid.ma Package" class="btn-secondary" />
             </xpath>
         </field>
     </record>

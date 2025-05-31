@@ -5,8 +5,8 @@
         <t t-call="web.html_container">
             <t t-foreach="docs" t-as="o">
             
-                <div class="page" style="width: 100%; height: 100%; padding: 0; margin: 0;">
-                    <div class="row" style="border: 2px solid black; margin: 0; height: 100%;">
+                <div class="page" style="width: 100%; height: 115mm; padding: 0; margin: 0;">
+                    <div class="row" style="border: 2px solid black; margin: 0; height: 115mm;">
                         <!-- Header with logos -->
                         <div class="col-12" style="border-bottom: 1px solid black; padding: 5px; text-align: center;">
                             <div class="row">
@@ -39,10 +39,8 @@
                             <div style="float: left; width: 60%; position: relative; min-height: 100px;">
                                 <div>
                                     <strong>Expediteur:</strong><br/>
-                                    <!-- <span t-esc="o.company_id.name or 'NEXT LEVEL'"/><br/> -->
                                     <span>SEBINFO</span><br/>
                                     <span>https://sebinfo.ma/</span><br/>
-                                    <!-- <span t-esc="o.company_id.phone or ''"/> -->
                                 </div>
                                 <div style="position: absolute; bottom: 0; right: 0; border: 1.5px solid black; width: 70px; text-align: center;">
                                     <span style="font-size: 18px; font-weight: bold;">Rabat</span>
@@ -99,6 +97,7 @@
                                 <img  t-att-src="'%s/shipping_api_connector/static/src/img/logo.jpeg' % request.httprequest.host_url" style="width: 140px; height: 140px; padding-top: 20px;"/>
                                 
                             </div>
+                            <div style="clear: both;"></div>
                         </div>
 
                     </div>

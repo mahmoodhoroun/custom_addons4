@@ -212,9 +212,111 @@ class StockPicking(models.Model):
         for record in self:
             record.action_create_barid_ma_package()
             
+    def action_delete_barid_ma_package(self):
+        """Delete package from Barid.ma API"""
+        self.ensure_one()
+        
+        if not self.barid_ma_package_id:
+            raise UserError(_('No Barid.ma package ID found. Cannot delete package.'))
+            
+        # Get the Barid.ma connector configuration
+        connector = self.env['shipping.barid.ma.connector'].search([('active', '=', True)], limit=1)
+        if not connector:
+            raise UserError(_('No active Barid.ma connector found. Please configure one first.'))
+        
+        # Ensure we have a valid token
+        if not connector.token:
+            connector.get_auth_token()
+        
+        # Prepare API URL
+        url = f"{connector.api_url}/Package/{self.barid_ma_package_id}"
+        
+        # Prepare headers with token
+        headers = {
+            'Authorization': f'Bearer {connector.token}'
+        }
+        
+        try:
+            # Make the API request
+            response = requests.request("DELETE", url, headers=headers, data={})
+            _logger.info(f"Barid.ma package deletion response: {response.status_code}")
+            _logger.info(f"Barid.ma package deletion response text: {response.text}")
+            
+            # Process the response
+            if response.status_code == 200:
+                # Clear the package data
+                self.barid_ma_package_id = False
+                self.barid_ma_tracking = False
+                self.barid_ma_fim_generated = False
+                self.barid_ma_contract_id = False
+                self.barid_ma_id_fim = False
+                
+                return {
+                    'type': 'ir.actions.client',
+                    'tag': 'display_notification',
+                    'params': {
+                        'title': _('Package Deleted'),
+                        'message': _('Successfully deleted package from Barid.ma'),
+                        'sticky': False,
+                        'type': 'success',
+                        'next': {'type': 'ir.actions.client', 'tag': 'reload'}
+                    }
+                }
+            else:
+                # Handle error response
+                error_message = response.text
+                try:
+                    error_data = response.json()
+                    error_message = error_data.get('message', error_message)
+                except:
+                    pass
+                
+                raise UserError(_('Failed to delete package: %s') % error_message)
+                
+        except Exception as e:
+            _logger.error('Barid.ma API error: %s', str(e))
+            raise UserError(_('Error connecting to Barid.ma API: %s') % str(e))
+    
+    def delete_multiple_packages(self):
+        """Delete multiple packages from Barid.ma API"""
+        success_count = 0
+        error_messages = []
+        
+        for record in self:
+            if not record.barid_ma_package_id:
+                error_messages.append(_('No package ID found for %s') % record.name)
+                continue
+                
+            try:
+                record.action_delete_barid_ma_package()
+                success_count += 1
+            except Exception as e:
+                error_messages.append(f"{record.name}: {str(e)}")
+        
+        # Return appropriate message
+        if success_count > 0:
+            message = _('Successfully deleted %d packages.') % success_count
+            if error_messages:
+                message += _('\nErrors occurred for some packages: %s') % '\n'.join(error_messages)
+                
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'title': _('Package Deletion Result'),
+                    'message': message,
+                    'sticky': bool(error_messages),  # Make sticky if there were errors
+                    'type': 'success' if not error_messages else 'warning',
+                    'next': {'type': 'ir.actions.client', 'tag': 'reload'}
+                }
+            }
+        else:
+            raise UserError(_('Failed to delete any packages:\n%s') % '\n'.join(error_messages))
+            
     def action_print_barid_ma_label(self):
         """Print the Barid.ma shipping label"""
         self.ensure_one()
+        
         if not self.barid_ma_tracking:
             raise UserError(_('No Barid.ma tracking number found. Please create a package first.'))
             
