@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Define the report template -->
+    <template id="report_barid_ma_tracking_table">
+        <t t-call="web.html_container">
+            <t t-call="web.internal_layout">
+                <div class="page">
+                    <h2 class="text-center mb-4">Barid.ma Tracking Numbers</h2>
+                    
+                    <table class="table table-bordered table-sm">
+                        <thead>
+                            <tr>
+                                <th class="text-center">No.</th>
+                                <th>Delivery Reference</th>
+                                <th>Customer</th>
+                                <th>Tracking Number</th>
+                                <th>Package ID</th>
+                                <th>FIM Generated</th>
+                                <th>Creation Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="docs" t-as="o">
+                                <tr t-if="o.barid_ma_tracking">
+                                    <td class="text-center">
+                                        <span t-esc="o_index + 1"/>
+                                    </td>
+                                    <td>
+                                        <span t-field="o.name"/>
+                                    </td>
+                                    <td>
+                                        <span t-field="o.partner_id.name"/>
+                                    </td>
+                                    <td>
+                                        <span t-field="o.barid_ma_tracking"/>
+                                    </td>
+                                    <td>
+                                        <span t-field="o.barid_ma_package_id"/>
+                                    </td>
+                                    <td>
+                                        <span t-if="o.barid_ma_fim_generated" class="badge badge-success">Yes</span>
+                                        <span t-else="" class="badge badge-danger">No</span>
+                                    </td>
+                                    <td>
+                                        <span t-field="o.create_date" t-options='{"widget": "date"}'/>
+                                    </td>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+                    
+                    <div class="row mt-4">
+                        <div class="col-6">
+                            <p><strong>Total Packages:</strong> <span t-esc="len([d for d in docs if d.barid_ma_tracking])"/></p>
+                        </div>
+                        <div class="col-6 text-right">
+                            <p><strong>Print Date:</strong> <span t-esc="context_timestamp(datetime.datetime.now()).strftime('%Y-%m-%d %H:%M:%S')"/></p>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </t>
+    </template>
+
+    <!-- Define the report action -->
+    <record id="action_report_barid_ma_tracking_table" model="ir.actions.report">
+        <field name="name">Barid.ma Tracking Table</field>
+        <field name="model">stock.picking</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">shipping_api_connector.report_barid_ma_tracking_table</field>
+        <field name="report_file">shipping_api_connector.report_barid_ma_tracking_table</field>
+        <field name="print_report_name">'Barid.ma Tracking Table'</field>
+        <field name="binding_model_id" ref="model_stock_picking"/>
+        <field name="binding_type">report</field>
+    </record>
+</odoo>

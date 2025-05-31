@@ -82,12 +82,12 @@ class StockPicking(models.Model):
 
         return cleaned
     
-    def action_create_barid_ma_package(self):
+    def action_create_barid_ma_package(self, record):
         """Create package in Barid.ma API"""
-        self.ensure_one()
+        record.ensure_one()
         
         # Get the Barid.ma connector configuration
-        connector = self.env['shipping.barid.ma.connector'].search([('active', '=', True)], limit=1)
+        connector = record.env['shipping.barid.ma.connector'].search([('active', '=', True)], limit=1)
         if not connector:
             raise UserError(_('No active Barid.ma connector found. Please configure one first.'))
         
@@ -96,10 +96,10 @@ class StockPicking(models.Model):
             connector.get_auth_token()
         
         # Get IdDestination based on partner city
-        partner = self.partner_id
+        partner = record.partner_id
         if not partner:
             raise UserError(_('No delivery address found.'))
-        id_destination = self._get_barid_ma_destination_id(connector, partner.city)
+        id_destination = record._get_barid_ma_destination_id(connector, partner.city)
         _logger.info(f"IdDestination: {id_destination}")
         _logger.info("****************************************")
     
@@ -107,15 +107,15 @@ class StockPicking(models.Model):
         url = f"{connector.api_url}/Package/bulkInsert/genereFim/false"
         
         # Get sale order
-        sale_order = self.env['sale.order'].search([('name', '=', self.origin)], limit=1) if self.origin else False
+        sale_order = record.env['sale.order'].search([('name', '=', record.origin)], limit=1) if record.origin else False
             
         # Calculate total weight
-        total_weight = sum(move_line.product_id.weight * move_line.quantity for move_line in self.move_line_ids)
+        total_weight = sum(move_line.product_id.weight * move_line.quantity for move_line in record.move_line_ids)
         if total_weight <= 0:
             total_weight = 1.0  # Default weight if no weight found
         
         # Get company phone
-        company_phone = self.company_id.phone or ''
+        company_phone = record.company_id.phone or ''
         
         # Prepare customer name
         first_name = partner.name
@@ -131,7 +131,7 @@ class StockPicking(models.Model):
         _logger.info(f"Contract ID: {contract_id}")
         _logger.info("****************************************")
         # Store the contract ID for later use in FIM generation
-        self.barid_ma_contract_id = contract_id
+        record.barid_ma_contract_id = contract_id
         
         # Prepare the payload
         payload = [{
@@ -144,15 +144,15 @@ class StockPicking(models.Model):
             "IdRelayPoint": None,
             "IdSite": None,
             "Cab": "",
-            "RefOrder": self.origin or "New",
+            "RefOrder": record.origin or "New",
             "NameRs": last_name,
             "FirstName": first_name,
-            "PhoneRecipient": self._format_moroccan_phone(partner.phone or partner.mobile),
+            "PhoneRecipient": record._format_moroccan_phone(partner.phone or partner.mobile),
             "PhoneSender": company_phone,
             "VD": None,
             "Weight": total_weight,
-            "CrbtType": self.crbt_type,
-            "CrbtValue": sale_order.amount_total if sale_order and self.crbt_type == 'Cash' else 0,
+            "CrbtType": record.crbt_type,
+            "CrbtValue": sale_order.amount_total if sale_order and record.crbt_type == 'Cash' else 0,
             "Fragile": False,
             "POD": False,
             "BL": False,
@@ -182,22 +182,22 @@ class StockPicking(models.Model):
                     # Extract tracking number and package ID from the response
                     package_info = result.get('success')[0]
                     if package_info.get('cab'):
-                        self.barid_ma_tracking = package_info.get('cab')
+                        record.barid_ma_tracking = package_info.get('cab')
                     if package_info.get('idPackage'):
-                        self.barid_ma_package_id = str(package_info.get('idPackage'))
+                        record.barid_ma_package_id = str(package_info.get('idPackage'))
                     
                     return {
                         'type': 'ir.actions.client',
                         'tag': 'display_notification',
                         'params': {
                             'title': _('Success'),
-                            'message': _('Package created successfully in Barid.ma. Tracking number: %s') % self.barid_ma_tracking,
+                            'message': _('Package created successfully in Barid.ma. Tracking number: %s') % record.barid_ma_tracking,
                             'sticky': False,
                             'type': 'success',
                             'next': {
                                 'type': 'ir.actions.act_window',
                                 'res_model': 'stock.picking',
-                                'res_id': self.id,
+                                'res_id': record.id,
                                 'view_mode': 'form',
                                 'target': 'current',
                                 'views': [(False, 'form')],
@@ -222,9 +222,19 @@ class StockPicking(models.Model):
             _logger.error('Barid.ma API error: %s', str(e))
             raise UserError(_('Error connecting to Barid.ma API: %s') % str(e))
     
+    def create_single_package(self):
+        self.ensure_one()
+        self.action_create_barid_ma_package(self)
+    
     def create_multiple_packages(self):
-        for record in self:
-            record.action_create_barid_ma_package()
+        packages_array = self
+
+        for record in packages_array:
+            try:
+                record.action_create_barid_ma_package(record)
+            
+            except Exception as e:
+                pass
             
     def action_delete_barid_ma_package(self):
         """Delete package from Barid.ma API"""

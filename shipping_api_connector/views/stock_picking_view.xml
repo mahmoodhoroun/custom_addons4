@@ -8,7 +8,7 @@
         <field name="arch" type="xml">
             <!-- Add buttons in header -->
             <xpath expr="//header" position="inside">
-                <button name="action_create_barid_ma_package" 
+                <button name="create_single_package" 
                         string="Create Barid.ma Package" 
                         type="object" 
                         class="oe_highlight" 

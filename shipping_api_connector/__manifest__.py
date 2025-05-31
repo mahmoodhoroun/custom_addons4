@@ -25,6 +25,7 @@
         'views/stock_picking_view.xml',
         'reports/paperformat.xml',
         'reports/barid_ma_label_report.xml',
+        'reports/barid_ma_tracking_report.xml',
     ],
     'assets': {
         'web.assets_frontend': [
