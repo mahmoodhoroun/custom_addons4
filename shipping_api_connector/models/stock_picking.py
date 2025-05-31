@@ -68,6 +68,20 @@ class StockPicking(models.Model):
             _logger.error(f"Error getting locality ID: {str(e)}")
             raise UserError(_('Error connecting to Barid.ma API to verify city: %s') % str(e))
     
+    def _format_moroccan_phone(self, number):
+        if not number:
+            return ""
+        # Remove spaces, dashes, and parentheses
+        cleaned = number.replace(" ", "").replace("-", "").replace("(", "").replace(")", "")
+        
+        # Normalize +212 or 212 to 0
+        if cleaned.startswith("+212"):
+            cleaned = "0" + cleaned[4:]
+        elif cleaned.startswith("212"):
+            cleaned = "0" + cleaned[3:]
+
+        return cleaned
+    
     def action_create_barid_ma_package(self):
         """Create package in Barid.ma API"""
         self.ensure_one()
@@ -133,7 +147,7 @@ class StockPicking(models.Model):
             "RefOrder": self.origin or "New",
             "NameRs": last_name,
             "FirstName": first_name,
-            "PhoneRecipient": partner.phone or partner.mobile or "",
+            "PhoneRecipient": self._format_moroccan_phone(partner.phone or partner.mobile),
             "PhoneSender": company_phone,
             "VD": None,
             "Weight": total_weight,
