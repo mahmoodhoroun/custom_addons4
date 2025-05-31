@@ -15,7 +15,7 @@
                                 <th>Customer</th>
                                 <th>Tracking Number</th>
                                 <th>Package ID</th>
-                                <th>FIM Generated</th>
+                                <!-- <th>FIM Generated</th> -->
                                 <th>Creation Date</th>
                             </tr>
                         </thead>
@@ -37,10 +37,10 @@
                                     <td>
                                         <span t-field="o.barid_ma_package_id"/>
                                     </td>
-                                    <td>
+                                    <!-- <td>
                                         <span t-if="o.barid_ma_fim_generated" class="badge badge-success">Yes</span>
                                         <span t-else="" class="badge badge-danger">No</span>
-                                    </td>
+                                    </td> -->
                                     <td>
                                         <span t-field="o.create_date" t-options='{"widget": "date"}'/>
                                     </td>
