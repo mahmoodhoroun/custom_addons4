@@ -224,7 +224,10 @@ class StockPicking(models.Model):
     
     def create_single_package(self):
         self.ensure_one()
-        self.action_create_barid_ma_package(self)
+        try:
+            self.action_create_barid_ma_package(self)
+        except Exception as e:
+            raise UserError(_("Error creating package in Barid.ma API: %s") % str(e))
     
     def create_multiple_packages(self):
         packages_array = self
