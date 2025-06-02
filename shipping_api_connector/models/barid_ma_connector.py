@@ -21,6 +21,11 @@ class BaridMaConnector(models.Model):
     id_contract2 = fields.Char(string='IdContract2')
     id_deposit = fields.Char(string='IdDeposit')
     id_site = fields.Char(string='IdSite', readonly=True)
+    codecontract1 = fields.Char(string='CodeContract1')
+    secretkey1 = fields.Char(string='SecretKey1')
+    codecontract2 = fields.Char(string='CodeContract2')
+    secretkey2 = fields.Char(string='SecretKey2')
+
     
     def get_auth_token(self):
         """Get authentication token from Barid.ma API"""

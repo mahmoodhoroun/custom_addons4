@@ -28,6 +28,11 @@
                         type="object" 
                         class="btn-secondary" 
                         invisible="picking_type_code != 'outgoing'"/>
+                <button name="update_barid_ma_tracking_value" 
+                        string="Update Tracking Info" 
+                        type="object" 
+                        class="btn-secondary" 
+                        invisible="picking_type_code != 'outgoing' or not barid_ma_tracking"/>
             </xpath>
             
             <!-- Add Barid.ma fields in the notebook -->
@@ -40,6 +45,7 @@
                             <field name="barid_ma_package_id"/>
                             <field name="barid_ma_contract_id"/>
                             <field name="barid_ma_fim_generated"/>
+                            <field name="tracking_value"/>
                         </group>
                         <group>
                             <field name="barid_ma_id_fim"/>

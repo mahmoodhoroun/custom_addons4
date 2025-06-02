@@ -21,6 +21,7 @@
     ],
     'data': [
         'security/ir.model.access.csv',
+        'data/cron_data.xml',
         'views/barid_ma_views.xml',
         'views/stock_picking_view.xml',
         'reports/paperformat.xml',

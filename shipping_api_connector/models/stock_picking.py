@@ -20,6 +20,7 @@ class StockPicking(models.Model):
     barid_ma_contract_id = fields.Char(string='Barid.ma Contract ID', readonly=True, copy=False)
     barid_ma_fim_generated = fields.Boolean(string='FIM Generated', default=False, readonly=True, copy=False)
     barid_ma_id_fim = fields.Char(string='Barid.ma ID FIM', readonly=True, copy=False)
+    tracking_value = fields.Char(string='Tracking Value')
     
     def _get_barid_ma_destination_id(self, connector, city):
         """Get destination ID from Barid.ma API based on city name"""
@@ -349,13 +350,131 @@ class StockPicking(models.Model):
             
         return self.env.ref('shipping_api_connector.action_report_barid_ma_label').report_action(self)
         
+    def update_barid_ma_tracking_value(self):
+        """Update tracking value from Barid.ma API"""
+        self.ensure_one()
+        
+        if not self.barid_ma_tracking:
+            raise UserError(_('No Barid.ma tracking number found. Please create a package first.'))
+            
+        # Get the Barid.ma connector configuration
+        connector = self.env['shipping.barid.ma.connector'].search([('active', '=', True)], limit=1)
+        if not connector:
+            raise UserError(_('No active Barid.ma connector found. Please configure one first.'))
+            
+        # Determine which contract and secret key to use
+        codecontract = connector.codecontract1
+        secretkey = connector.secretkey1
+        
+        if self.barid_ma_contract_id == connector.id_contract2:
+            codecontract = connector.codecontract2
+            secretkey = connector.secretkey2
+        
+        # Prepare API URL
+        url = f"https://api-bam.barid.ma/publichtrack/ApiTracking.asmx/GetTrackingInfosOperColisByContrat?CodeBordereau={self.barid_ma_tracking}&codecontrat={codecontract}&SecretKey={secretkey}"
+        
+        # Prepare headers with token
+        headers = {
+            'Authorization': f'Bearer {connector.token}'
+        }
+        
+        try:
+            # Make the API request
+            response = requests.get(url, headers=headers)
+            
+            # Process the response
+            if response.status_code == 200:
+                result = response.json()
+                _logger.info(f"Barid.ma tracking response: {result}")
+                
+                if result.get('Code') == 200 and result.get('datas') and len(result['datas']) > 0:
+                    # Get the first event (most recent)
+                    first_event = result['datas'][0]
+                    
+                    # Update the tracking value with the event description
+                    if first_event.get('event_'):
+                        self.tracking_value = first_event['event_']
+                        return {
+                            'type': 'ir.actions.client',
+                            'tag': 'display_notification',
+                            'params': {
+                                'title': _('Tracking Updated'),
+                                'message': _('Successfully updated tracking information: %s') % self.tracking_value,
+                                'sticky': False,
+                                'type': 'success',
+                                'next': {'type': 'ir.actions.client', 'tag': 'reload'}
+                            }
+                        }
+                    else:
+                        raise UserError(_('No event information found in the tracking response.'))
+                else:
+                    error_message = result.get('Message', 'Unknown error')
+                    raise UserError(_('Failed to get tracking information: %s') % error_message)
+            else:
+                raise UserError(_('Failed to get tracking information. Status code: %s') % response.status_code)
+        except Exception as e:
+            _logger.error('Barid.ma API error: %s', str(e))
+            raise UserError(_('Error connecting to Barid.ma API: %s') % str(e))
+    
+    @api.model
+    def _cron_update_barid_ma_tracking(self):
+        """Cron job to update tracking values for all done deliveries with Barid.ma tracking"""
+        pickings = self.search([
+            ('state', '=', 'done'),
+            ('barid_ma_tracking', '!=', False)
+        ])
+        
+        updated_count = 0
+        for picking in pickings:
+            try:
+                # Get the Barid.ma connector configuration
+                connector = self.env['shipping.barid.ma.connector'].search([('active', '=', True)], limit=1)
+                if not connector:
+                    continue
+                    
+                # Determine which contract and secret key to use
+                codecontract = connector.codecontract1
+                secretkey = connector.secretkey1
+                
+                if picking.barid_ma_contract_id == connector.id_contract2:
+                    codecontract = connector.codecontract2
+                    secretkey = connector.secretkey2
+                
+                # Prepare API URL
+                url = f"https://api-bam.barid.ma/publichtrack/ApiTracking.asmx/GetTrackingInfosOperColisByContrat?CodeBordereau={picking.barid_ma_tracking}&codecontrat={codecontract}&SecretKey={secretkey}"
+                
+                # Prepare headers with token
+                headers = {
+                    'Authorization': f'Bearer {connector.token}'
+                }
+                
+                # Make the API request
+                response = requests.get(url, headers=headers)
+                
+                # Process the response
+                if response.status_code == 200:
+                    result = response.json()
+                    
+                    if result.get('Code') == 200 and result.get('datas') and len(result['datas']) > 0:
+                        # Get the first event (most recent)
+                        first_event = result['datas'][0]
+                        
+                        # Update the tracking value with the event description
+                        if first_event.get('event_'):
+                            picking.tracking_value = first_event['event_']
+                            updated_count += 1
+            except Exception as e:
+                _logger.error('Error updating tracking for picking %s: %s', picking.name, str(e))
+                continue
+        
+        _logger.info('Updated tracking values for %s pickings', updated_count)
+        return True
+        
     def action_generate_fim(self):
         """Generate FIM for Barid.ma packages"""
-        # Filter records that can have FIMs generated
         valid_pickings = self.filtered(lambda p: p.barid_ma_tracking and not p.barid_ma_fim_generated)
-        
         if not valid_pickings:
-            raise UserError(_('No valid deliveries found for FIM generation. Ensure they have tracking numbers and have not already had FIMs generated.'))
+            raise UserError(_('No valid deliveries found for FIM generation. Ensure deliveries have tracking numbers and FIM is not already generated.'))
             
         # Get the Barid.ma connector configuration
         connector = self.env['shipping.barid.ma.connector'].search([('active', '=', True)], limit=1)
