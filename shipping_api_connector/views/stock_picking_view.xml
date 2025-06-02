@@ -45,7 +45,7 @@
                             <field name="barid_ma_package_id"/>
                             <field name="barid_ma_contract_id"/>
                             <field name="barid_ma_fim_generated"/>
-                            <field name="tracking_value"/>
+                            <field name="tracking_value" readonly="1"/>
                         </group>
                         <group>
                             <field name="barid_ma_id_fim"/>
@@ -64,6 +64,7 @@
             <xpath expr="//field[@name='state']" position="after">
                 <field name="barid_ma_tracking" optional="show"/>
                 <field name="barid_ma_contract_id" optional="show"/>
+                <field name="tracking_value" optional="show"/>
                 <field name="barid_ma_fim_generated" optional="show"/>
             </xpath>
         </field>
