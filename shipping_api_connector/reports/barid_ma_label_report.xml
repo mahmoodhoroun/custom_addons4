@@ -79,10 +79,12 @@
                                     <div style="padding: 5px;">
                                         <strong>DESTINATAIRE:</strong> <span t-esc="o.partner_id.name"/><br/>
                                         <strong>Adresse quartier:</strong> <span t-esc="o.partner_id.street or ''"/><br/>
-                                        <strong>Code Postal:</strong> <span t-esc="o.partner_id.zip or ''"/><br/>
+                                        <!-- <strong>Code Postal:</strong> <span t-esc="o.partner_id.zip or ''"/><br/> -->
                                         <strong>Telephone:</strong> <span t-esc="o.partner_id.phone or o.partner_id.mobile or ''"/><br/>
-                                        <strong>SMS Destinataire:</strong><br/>
+                                        <!-- <strong>SMS Destinataire:</strong><br/> -->
                                     </div>
+                                    <br/>
+                                    <br/>
                                     <div style="position: absolute; bottom: 0;">
                                         <table style="border: 1px solid black; width: 100%; border-collapse: collapse;"> 
                                             <tr >
