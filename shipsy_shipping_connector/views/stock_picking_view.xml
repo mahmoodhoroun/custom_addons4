@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Extend Stock Picking Form View -->
+    <record id="view_picking_form_shipsy_inherit" model="ir.ui.view">
+        <field name="name">stock.picking.form.shipsy.inherit</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="action_send_to_shipsy" 
+                        string="Send to Shipsy" 
+                        type="object" 
+                        class="oe_highlight"
+                        invisible="not shipsy_connector_id or shipsy_reference_number"/>
+                <button name="action_get_shipsy_label" 
+                        string="Download Shipsy Label" 
+                        type="object" 
+                        class="btn-secondary"
+                        invisible="not shipsy_reference_number"/>
+                <button name="action_cancel_shipsy_delivery" 
+                        string="Cancel in Shipsy" 
+                        type="object" 
+                        class="btn-secondary"
+                        invisible="not shipsy_reference_number or shipsy_is_cancelled"
+                        confirm="Are you sure you want to cancel this delivery in Shipsy?"/>
+            </xpath>
+            <xpath expr="//page[@name='extra']" position="after">
+                <page string="Shipsy Shipping" invisible="picking_type_code != 'outgoing'">
+                    <group>
+                        <group>
+                            <field name="shipsy_connector_id" options="{'no_create': True}"/>
+                            <field name="shipsy_service_type"/>
+                            <field name="shipsy_consignment_type"/>
+                            <field name="shipsy_description"/>
+                        </group>
+                        <group>
+                            <field name="shipsy_reference_number" readonly="1"/>
+                            <field name="shipsy_date" readonly="1"/>
+                            <field name="shipsy_pickup_id" readonly="1"/>
+                            <field name="shipsy_is_print" readonly="1"/>
+                            <field name="shipsy_is_cancelled" readonly="1"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+    <!-- Extend Stock Picking Tree View -->
+    <record id="view_picking_tree_shipsy_inherit" model="ir.ui.view">
+        <field name="name">stock.picking.tree.shipsy.inherit</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.vpicktree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='origin']" position="after">
+                <field name="shipsy_reference_number" optional="show"/>
+                <field name="shipsy_pickup_id" optional="show"/>
+            </xpath>
+        </field>
+    </record>
+    <record id="action_send_multiple_to_shipsy" model="ir.actions.server">
+        <field name="name">Send to Chronodiali</field>
+        <field name="model_id" ref="stock.model_stock_picking"/>
+        <field name="binding_model_id" ref="stock.model_stock_picking"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">action = records.action_send_multiple_to_shipsy()</field>
+    </record>
+    
+    <record id="action_shipsy_pickup_wizard" model="ir.actions.act_window">
+        <field name="name">Create Chronodiali Pickup</field>
+        <field name="res_model">shipsy.pickup.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="stock.model_stock_picking"/>
+        <field name="binding_view_types">list</field>
+    </record>
+
+    <record id="action_print_multiple_shipsy_labels" model="ir.actions.server">
+        <field name="name">Print Chronodiali Labels</field>
+        <field name="model_id" ref="stock.model_stock_picking"/>
+        <field name="binding_model_id" ref="stock.model_stock_picking"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">action = records.action_print_multiple_shipsy_labels()</field>
+    </record>
+
+</odoo>

@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_shipping_shipsy_connector_user,shipping.shipsy.connector.user,model_shipping_shipsy_connector,stock.group_stock_user,1,0,0,0
+access_shipping_shipsy_connector_manager,shipping.shipsy.connector.manager,model_shipping_shipsy_connector,stock.group_stock_manager,1,1,1,1
+access_shipsy_pickup_wizard_user,shipsy.pickup.wizard.user,model_shipsy_pickup_wizard,stock.group_stock_user,1,1,1,1
