@@ -5,7 +5,7 @@ import json
 import logging
 import base64
 import io
-from PyPDF2 import PdfMerger
+from PyPDF2 import PdfFileMerger
 
 _logger = logging.getLogger(__name__)
 
@@ -225,7 +225,7 @@ class StockPicking(models.Model):
             raise UserError(_('No deliveries with Shipsy reference numbers selected.'))
             
         # Get labels for all selected pickings
-        merger = PdfMerger()
+        merger = PdfFileMerger()
         success_count = 0
         error_count = 0
         error_messages = []
