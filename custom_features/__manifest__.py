@@ -12,6 +12,8 @@
         'views/purchase_order_template.xml',
         'views/mrp_bom_addition_view.xml',
         'views/sale_order_view.xml',
+        'wizards/sale_order_cancel_confirm_view.xml',
+        'reports/picking_labels.xml',
     ],
     'installable': True,
     'application': True,

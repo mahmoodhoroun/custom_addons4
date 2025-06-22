@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_sale_order_cancel_confirm_form" model="ir.ui.view">
+        <field name="name">sale.order.cancel.confirm.form</field>
+        <field name="model">sale.order.cancel.confirm</field>
+        <field name="arch" type="xml">
+            <form string="Cancel Order">
+                <sheet>
+                    <group>
+                        <field name="order_id" invisible="1"/>
+                        <field name="reason" required="1"/>
+                    </group>
+                    <div class="alert alert-warning" role="alert" invisible="confirmation_message == False">
+                        <field name="confirmation_message" readonly="1" nolabel="1"/>
+                    </div>
+                </sheet>
+                <footer>
+                    <button name="action_confirm_cancel" string="Confirm Cancellation" type="object" class="btn-primary"/>
+                    <button string="Discard" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_sale_order_cancel_confirm" model="ir.actions.act_window">
+        <field name="name">Cancel Order</field>
+        <field name="res_model">sale.order.cancel.confirm</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

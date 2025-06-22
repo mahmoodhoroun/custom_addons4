@@ -1,4 +1,5 @@
-from odoo import models, fields, api
+from odoo import models, fields, api, _
+from odoo.exceptions import UserError
 
 class SaleOrder(models.Model):
     _inherit = 'sale.order'
@@ -8,6 +9,42 @@ class SaleOrder(models.Model):
     receipt_count = fields.Integer(
         string='Receipts Count', compute='_compute_receipt_count', store=True
     )
+    customr_phone = fields.Char(string='Customer Phone', compute='_compute_customer_phone')
+    cancel_reason = fields.Selection([
+        ('wrong_number', 'Wrong number'),
+        ('call_rejected', 'Call rejected'),
+        ('duplicated_order', 'Duplicated order'),
+        ('out_of_coverage', 'Out of coverage'),
+        ('out_of_stock', 'Out of stock'),
+    ], string='Cancellation Reason')
+
+    def action_cancel_custom(self):
+        """Override the standard cancel method to show the wizard"""
+        # If we're bypassing the wizard (coming from the wizard itself), call the super method
+        if self.env.context.get('bypass_cancel_wizard'):
+            return super(SaleOrder, self).action_cancel()
+            
+        # Otherwise, show the wizard
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Select Cancellation Reason'),
+            'res_model': 'sale.order.cancel.confirm',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {
+                'default_order_id': self.id,
+                'default_reason': self.cancel_reason or False,
+            }
+        }
+        
+    def _action_cancel(self):
+        """Actual cancellation method called from the wizard"""
+        return super(SaleOrder, self)._action_cancel()
+
+    def _compute_customer_phone(self):
+        for order in self:
+            order.customr_phone = order.partner_id.phone or order.partner_id.mobile
+
 
     @api.depends('receipt_ids')
     def _compute_receipt_count(self):

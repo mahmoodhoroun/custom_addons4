@@ -8,6 +8,15 @@
             <!-- Locate the VAT field and modify its label -->
             <xpath expr="//field[@name='partner_id']" position="after">
 <!--                <field name="receive_products"></field>-->
+                    <field name="customr_phone"></field>
+            </xpath>
+            
+            <!-- Add cancel reason field -->
+            <xpath expr="//field[@name='payment_term_id']" position="after">
+                <field name="cancel_reason" readonly="1"/>
+            </xpath>
+            <xpath expr="//button[@name='action_cancel']" position="attributes">
+                <attribute name="name">action_cancel_custom</attribute>
             </xpath>
         </field>
     </record>
@@ -53,6 +62,9 @@
                         string="Confirm"
                         type="object"
                         class="btn-primary"/>
+            </xpath>
+            <xpath expr="//field[@name='state']" position="after">
+                <field name="cancel_reason" readonly="1" optional="show" widget="badge"/>
             </xpath>
         </field>
     </record>

@@ -8,7 +8,6 @@
         It allows you to connect with Shipsy API and manage shipments.
     """,
     'author': 'Odoo',
-    'website': 'https://www.odoo.com',
     'depends': ['stock', 'delivery'],
     'data': [
         'security/ir.model.access.csv',

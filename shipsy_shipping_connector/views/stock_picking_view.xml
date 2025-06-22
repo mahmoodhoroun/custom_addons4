@@ -8,24 +8,24 @@
         <field name="arch" type="xml">
             <xpath expr="//header" position="inside">
                 <button name="action_send_to_shipsy" 
-                        string="Send to Shipsy" 
+                        string="Send to Chronodiali" 
                         type="object" 
                         class="oe_highlight"
                         invisible="not shipsy_connector_id or shipsy_reference_number"/>
                 <button name="action_get_shipsy_label" 
-                        string="Download Shipsy Label" 
+                        string="Download Chronodiali Label" 
                         type="object" 
                         class="btn-secondary"
                         invisible="not shipsy_reference_number"/>
                 <button name="action_cancel_shipsy_delivery" 
-                        string="Cancel in Shipsy" 
+                        string="Cancel in Chronodiali" 
                         type="object" 
                         class="btn-secondary"
                         invisible="not shipsy_reference_number or shipsy_is_cancelled"
-                        confirm="Are you sure you want to cancel this delivery in Shipsy?"/>
+                        confirm="Are you sure you want to cancel this delivery in Chronodiali?"/>
             </xpath>
             <xpath expr="//page[@name='extra']" position="after">
-                <page string="Shipsy Shipping" invisible="picking_type_code != 'outgoing'">
+                <page string="Chronodiali Shipping" invisible="picking_type_code != 'outgoing'">
                     <group>
                         <group>
                             <field name="shipsy_connector_id" options="{'no_create': True}"/>
@@ -55,9 +55,17 @@
                 <field name="shipsy_reference_number" optional="show"/>
                 <field name="shipsy_pickup_id" optional="show"/>
             </xpath>
+            <xpath expr="//tree" position="attributes">
+                <attribute name="decoration-muted">state == 'cancel'</attribute>
+            </xpath>
+            <xpath expr="//header" position="inside">
+                <button name="%(action_send_multiple_to_shipsy)d" type="action" string="Send to Chronodiali" class="btn-primary" />
+                <button name="%(action_shipsy_pickup_wizard)d" type="action" string="Create Chronodiali Pickup" class="btn-primary" />
+                <button name="%(action_print_multiple_shipsy_labels)d" type="action" string="Print Chronodiali Labels" class="btn-primary" />
+            </xpath>
         </field>
     </record>
-    <record id="action_send_multiple_to_shipsy" model="ir.actions.server">
+    <!-- <record id="action_send_multiple_to_shipsy" model="ir.actions.server">
         <field name="name">Send to Chronodiali</field>
         <field name="model_id" ref="stock.model_stock_picking"/>
         <field name="binding_model_id" ref="stock.model_stock_picking"/>
@@ -82,6 +90,6 @@
         <field name="binding_view_types">list</field>
         <field name="state">code</field>
         <field name="code">action = records.action_print_multiple_shipsy_labels()</field>
-    </record>
+    </record> -->
 
 </odoo>

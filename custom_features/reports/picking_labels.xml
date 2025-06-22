@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- First template: Simple label format (like first image) -->
+    <template id="report_picking_label_simple">
+        <div class="page" style="border: 0; padding: 2mm; width: 100%; max-width: 58mm; margin: 0;">
+            <!-- Barcode at the top -->
+            <div class="text-center mb-1" style="text-align: center; margin-top: 5px;">
+                <div class="text-center o_label_small_barcode" style="text-align: center;">
+                    <div t-out="o.name" style="padding:0; margin: 0 auto;" t-options="{'widget': 'barcode', 'quiet': 0, 'symbology': 'Code128', 'img_style': 'width:45mm;height:8mm; margin: 0 auto;'}"/>
+                </div>
+                <strong style="font-size: 12px; text-align: center; display: block;"><t t-esc="o.name"/></strong>
+            </div>
+            <br/>
+          
+            <!-- Carrier information -->
+            <div class="mb-2" style="font-size: 12px;">
+                <span><strong>Carrier: </strong></span>
+                <span t-field="o.carrier_id.name" t-if="o.carrier_id"/>
+                <span t-if="not o.carrier_id">Flexible shipping</span>
+            </div>
+            <br/>
+            <br/>
+            
+            <!-- Table header -->
+            <table class="table table-sm" style="margin-bottom: 0; font-size: 10px;">
+                <thead>
+                    <tr>
+                        <th style="width: 60%; border-top: none; padding: 1px;">Product</th>
+                        <th style="width: 20%; text-align: center; border-top: none; padding: 1px;">Qty</th>
+                        <th style="width: 20%; text-align: right; border-top: none; padding: 1px;">Location</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr t-foreach="o.move_ids" t-as="move">
+                        <td style="border-top: none; padding: 1px;">
+                            <span t-field="move.product_id.name"/>
+                        </td>
+                        <td style="text-align: center; border-top: none; padding: 1px;">
+                            <span t-field="move.product_uom_qty"/>
+                        </td>
+                        <td style="text-align: right; border-top: none; padding: 1px;">
+                            <span t-field="move.location_id"/>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </template>
+    
+    <!-- Second template: Detailed label format (like second image) -->
+    <template id="report_picking_label_detailed">
+        <div class="page" style="border: 0; padding: 1mm; width: 100%; max-width: 58mm; margin: 0;">
+            <!-- Barcode -->
+            <div class="text-center mb-1" style="text-align: center; margin-top: 5px;">
+                <div class="text-center o_label_small_barcode" style="text-align: center;">
+                    <!-- `quiet=0` to remove the left and right margins on the barcode -->
+                    <div t-out="o.name" style="padding:0; margin: 0 auto;" t-options="{'widget': 'barcode', 'quiet': 0, 'symbology': 'Code128', 'img_style': 'width:45mm;height:8mm; margin: 0 auto;'}"/>
+                </div>
+                <strong style="font-size: 12px; text-align: center; display: block;"><t t-esc="o.name"/></strong>
+            </div>
+            <br/>
+            
+            
+            <!-- Carrier information -->
+            <div class="mb-2" style="font-size: 12px;">
+                <span><strong>Carrier:</strong> </span>
+                <span t-field="o.carrier_id.name" t-if="o.carrier_id"/>
+                <span t-if="not o.carrier_id">Flexible shipping</span>
+            </div>
+            <br/>
+            
+            <!-- Products table -->
+            <table class="table table-sm" style="margin-bottom: 0; font-size: 10px;">
+                <thead>
+                    <tr>
+                        <th style="width: 60%; border-top: none; padding: 1px;">Product</th>
+                        <th style="width: 20%; text-align: center; border-top: none; padding: 1px;">Qty</th>
+                        <th style="width: 20%; text-align: right; border-top: none; padding: 1px;">Location</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr t-foreach="o.move_ids" t-as="move">
+                        <td style="border-top: none; padding: 1px;">
+                            <span t-field="move.product_id.name"/>
+                        </td>
+                        <td style="text-align: center; border-top: none; padding: 1px;">
+                            <span t-field="move.product_uom_qty"/>
+                        </td>
+                        <td style="text-align: right; border-top: none; padding: 1px;">
+                            <span t-field="move.location_id"/>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </template>
+    
+    <!-- Main template that calls the appropriate format -->
+    <template id="report_picking_labels">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <!-- Use the simple format for standard pickings -->
+                <t t-if="o.picking_type_code == 'outgoing'">
+                    <t t-call="custom_features.report_picking_label_detailed"/>
+                </t>
+                <!-- Use the simple format for all other pickings -->
+                <t t-else="">
+                    <t t-call="custom_features.report_picking_label_simple"/>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- Custom paper format for label printing -->
+    <record id="paperformat_picking_label" model="report.paperformat">
+        <field name="name">Picking Label Format</field>
+        <field name="default" eval="False" />
+        <field name="format">custom</field>
+        <field name="page_height">70</field>
+        <field name="page_width">60</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">1</field>
+        <field name="margin_bottom">1</field>
+        <field name="margin_left">1</field>
+        <field name="margin_right">1</field>
+        <field name="header_line" eval="False" />
+        <field name="header_spacing">0</field>
+        <field name="dpi">90</field>
+    </record>
+
+    <!-- Define the report action -->
+    <record id="action_report_picking_labels" model="ir.actions.report">
+        <field name="name">Picking Labels</field>
+        <field name="model">stock.picking</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">custom_features.report_picking_labels</field>
+        <field name="report_file">custom_features.report_picking_labels</field>
+        <field name="print_report_name">'Picking Labels - %s' % (object.name)</field>
+        <field name="binding_model_id" ref="stock.model_stock_picking"/>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="custom_features.paperformat_picking_label"/>
+    </record>
+</odoo>

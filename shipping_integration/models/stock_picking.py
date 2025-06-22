@@ -31,7 +31,7 @@ class StockPicking(models.Model):
                     ('delivery_print', 'Delivery Printed'),
                     ('delivery_pickup', 'Delivery Picked Up')])
 
-    print = fields.Boolean(string="Print", default=False)
+    print = fields.Boolean(string="Étiquette imprimée", default=False)
 
     def call_shipping_api(self):
         for rec in self:
