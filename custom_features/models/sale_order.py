@@ -16,7 +16,15 @@ class SaleOrder(models.Model):
         ('duplicated_order', 'Duplicated order'),
         ('out_of_coverage', 'Out of coverage'),
         ('out_of_stock', 'Out of stock'),
-    ], string='Cancellation Reason')
+        ('no_reply', 'No reply'),
+    ], string='Cancellation Reason', tracking=True)
+
+    status2 = fields.Selection([
+        ('line_busy', 'Line busy'),
+        ('disconnected', 'Disconnected'),
+        ('no_reply', 'No reply'),
+        ('callback_requested', 'Callback requested'),
+    ], string='Status2', tracking=True)
 
     def action_cancel_custom(self):
         """Override the standard cancel method to show the wizard"""

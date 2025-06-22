@@ -14,12 +14,13 @@
             <!-- Add cancel reason field -->
             <xpath expr="//field[@name='payment_term_id']" position="after">
                 <field name="cancel_reason" readonly="1"/>
+                <field name="status2"/>
             </xpath>
             <xpath expr="//button[@name='action_cancel']" position="attributes">
                 <attribute name="invisible">1</attribute>
             </xpath>
             <xpath expr="//button[@name='action_cancel']" position="after">
-                <button name="action_cancel_custom" string="Cancel" type="object" class="oe_highlight"/>
+                <button name="action_cancel_custom" string="Cancel" type="object" class="oe_highlight" invisible="state == 'cancel'"/>
             </xpath>
         </field>
     </record>
@@ -37,7 +38,49 @@
                     name="filter_s"
                     string="odoo order"
                     domain="[('name', '=ilike', 'S%')]"/>
+                <separator/>
+                <filter
+                    name="filter_wrong_number"
+                    string="Wrong number"
+                    domain="[('cancel_reason', '=', 'wrong_number')]"/>
+                <filter
+                    name="filter_call_rejected"
+                    string="Call rejected"
+                    domain="[('cancel_reason', '=', 'call_rejected')]"/>
+                <filter
+                    name="filter_duplicated_order"
+                    string="Duplicated order"
+                    domain="[('cancel_reason', '=', 'duplicated_order')]"/>
+                <filter
+                    name="filter_out_of_coverage"
+                    string="Out of coverage"
+                    domain="[('cancel_reason', '=', 'out_of_coverage')]"/>
+                <filter
+                    name="filter_out_of_stock"
+                    string="Out of stock"
+                    domain="[('cancel_reason', '=', 'out_of_stock')]"/>
+                <filter
+                    name="filter_no_reply"
+                    string="No reply"
+                    domain="[('cancel_reason', '=', 'no_reply')]"/>
 
+                <separator/>
+                <filter
+                    name="filter_line_busy"
+                    string="Line busy"
+                    domain="[('status2', '=', 'line_busy')]"/>
+                <filter
+                    name="filter_disconnected"
+                    string="Disconnected"
+                    domain="[('status2', '=', 'disconnected')]"/>
+                <filter
+                    name="filter_callback_requested"
+                    string="Callback requested"
+                    domain="[('status2', '=', 'callback_requested')]"/>
+                <filter
+                    name="filter_no_reply"
+                    string="No reply"
+                    domain="[('status2', '=', 'no_reply')]"/>
             </xpath>
         </field>
     </record>
@@ -68,6 +111,7 @@
             </xpath>
             <xpath expr="//field[@name='state']" position="after">
                 <field name="cancel_reason" readonly="1" optional="show" widget="badge"/>
+                <field name="status2" optional="show" widget="badge"/>
             </xpath>
         </field>
     </record>

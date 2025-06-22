@@ -11,6 +11,7 @@ class SaleOrderCancelConfirm(models.TransientModel):
         ('duplicated_order', 'Duplicated order'),
         ('out_of_coverage', 'Out of coverage'),
         ('out_of_stock', 'Out of stock'),
+        ('no_reply', 'No reply'),
     ], string='Cancellation Reason', required=True)
     confirmation_message = fields.Text(string='Confirmation Message', readonly=True)
     
