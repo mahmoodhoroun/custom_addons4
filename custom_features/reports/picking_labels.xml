@@ -2,7 +2,7 @@
 <odoo>
     <!-- First template: Simple label format (like first image) -->
     <template id="report_picking_label_simple">
-        <div class="page" style="border: 0; padding: 2mm; width: 100%; max-width: 58mm; margin: 0;">
+        <div class="page" style="border: 0; padding: 2mm; width: 100%; max-width: 68mm; margin: 0;">
             <!-- Barcode at the top -->
             <div class="text-center mb-1" style="text-align: center; margin-top: 5px;">
                 <div class="text-center o_label_small_barcode" style="text-align: center;">
@@ -49,7 +49,7 @@
     
     <!-- Second template: Detailed label format (like second image) -->
     <template id="report_picking_label_detailed">
-        <div class="page" style="border: 0; padding: 1mm; width: 100%; max-width: 58mm; margin: 0;">
+        <div class="page" style="border: 0; padding: 1mm; width: 100%; max-width: 68mm; margin: 0;">
             <!-- Barcode -->
             <div class="text-center mb-1" style="text-align: center; margin-top: 5px;">
                 <div class="text-center o_label_small_barcode" style="text-align: center;">
@@ -117,7 +117,7 @@
         <field name="default" eval="False" />
         <field name="format">custom</field>
         <field name="page_height">70</field>
-        <field name="page_width">60</field>
+        <field name="page_width">70</field>
         <field name="orientation">Portrait</field>
         <field name="margin_top">1</field>
         <field name="margin_bottom">1</field>
