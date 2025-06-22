@@ -8,7 +8,7 @@
                 <div class="text-center o_label_small_barcode" style="text-align: center;">
                     <div t-out="o.name" style="padding:0; margin: 0 auto;" t-options="{'widget': 'barcode', 'quiet': 0, 'symbology': 'Code128', 'img_style': 'width:45mm;height:8mm; margin: 0 auto;'}"/>
                 </div>
-                <strong style="font-size: 12px; text-align: center; display: block;"><t t-esc="o.name"/></strong>
+                <strong style="font-size: 12px; text-align: center; display: block; margin-top: 5px;"><t t-esc="o.name"/></strong>
             </div>
             <br/>
           
@@ -56,7 +56,7 @@
                     <!-- `quiet=0` to remove the left and right margins on the barcode -->
                     <div t-out="o.name" style="padding:0; margin: 0 auto;" t-options="{'widget': 'barcode', 'quiet': 0, 'symbology': 'Code128', 'img_style': 'width:45mm;height:8mm; margin: 0 auto;'}"/>
                 </div>
-                <strong style="font-size: 12px; text-align: center; display: block;"><t t-esc="o.name"/></strong>
+                <strong style="font-size: 12px; text-align: center; display: block; margin-top: 5px;"><t t-esc="o.name"/></strong>
             </div>
             <br/>
             
