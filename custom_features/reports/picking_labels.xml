@@ -99,6 +99,8 @@
     <template id="report_picking_labels">
         <t t-call="web.html_container">
             <t t-foreach="docs" t-as="o">
+                <!-- Force a new page for each picking -->
+                <div style="page-break-before: always; page-break-after: always; page-break-inside: avoid;"></div>
                 <!-- Use the simple format for standard pickings -->
                 <t t-if="o.picking_type_code == 'outgoing'">
                     <t t-call="custom_features.report_picking_label_detailed"/>
@@ -130,12 +132,12 @@
 
     <!-- Define the report action -->
     <record id="action_report_picking_labels" model="ir.actions.report">
-        <field name="name">Picking Labels</field>
+        <field name="name">Étiquettes de prélèvement</field>
         <field name="model">stock.picking</field>
         <field name="report_type">qweb-pdf</field>
         <field name="report_name">custom_features.report_picking_labels</field>
         <field name="report_file">custom_features.report_picking_labels</field>
-        <field name="print_report_name">'Picking Labels - %s' % (object.name)</field>
+        <field name="print_report_name">'Étiquettes de prélèvement - %s' % (object.name)</field>
         <field name="binding_model_id" ref="stock.model_stock_picking"/>
         <field name="binding_type">report</field>
         <field name="paperformat_id" ref="custom_features.paperformat_picking_label"/>

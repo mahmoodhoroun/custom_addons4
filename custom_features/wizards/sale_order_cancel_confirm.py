@@ -6,13 +6,14 @@ class SaleOrderCancelConfirm(models.TransientModel):
 
     order_id = fields.Many2one('sale.order', string='Sale Order', required=True)
     reason = fields.Selection([
-        ('wrong_number', 'Wrong number'),
-        ('call_rejected', 'Call rejected'),
-        ('duplicated_order', 'Duplicated order'),
-        ('out_of_coverage', 'Out of coverage'),
-        ('out_of_stock', 'Out of stock'),
-        ('no_reply', 'No reply'),
-    ], string='Cancellation Reason', required=True)
+        ('wrong_number', 'Mauvais numéro'),
+        ('call_rejected', 'Appel rejeté'),
+        ('duplicated_order', 'Commande en double'),
+        ('out_of_coverage', 'Hors couverture'),
+        ('out_of_stock', 'Rupture de stock'),
+        ('no_reply', 'Pas de réponse'),
+        ('fake_order', 'Commande frauduleuse'),
+    ], string='Motif d\'annulation', required=True)
     confirmation_message = fields.Text(string='Confirmation Message', readonly=True)
     
     @api.onchange('reason')

@@ -15,8 +15,8 @@
                     </div>
                 </sheet>
                 <footer>
-                    <button name="action_confirm_cancel" string="Confirm Cancellation" type="object" class="btn-primary"/>
-                    <button string="Discard" class="btn-secondary" special="cancel"/>
+                    <button name="action_confirm_cancel" string="Confirmer" type="object" class="btn-primary"/>
+                    <button string="Annuler" class="btn-secondary" special="cancel"/>
                 </footer>
             </form>
         </field>

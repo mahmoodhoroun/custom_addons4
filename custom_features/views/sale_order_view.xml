@@ -13,14 +13,14 @@
             
             <!-- Add cancel reason field -->
             <xpath expr="//field[@name='payment_term_id']" position="after">
-                <field name="cancel_reason" readonly="1"/>
                 <field name="status2"/>
+                <field name="cancel_reason" readonly="1"/>
             </xpath>
             <xpath expr="//button[@name='action_cancel']" position="attributes">
                 <attribute name="invisible">1</attribute>
             </xpath>
             <xpath expr="//button[@name='action_cancel']" position="after">
-                <button name="action_cancel_custom" string="Cancel" type="object" class="oe_highlight" invisible="state == 'cancel'"/>
+                <button name="action_cancel_custom" string="Annuler" type="object" class="oe_highlight" invisible="state == 'cancel'"/>
             </xpath>
         </field>
     </record>
@@ -32,54 +32,59 @@
             <xpath expr="//search" position="inside">
                 <filter
                     name="filter_woo"
-                    string="Wordpress order"
+                    string="Commandes Woocommerce"
                     domain="[('name', '=ilike', 'WOO_%')]"/>
                 <filter
                     name="filter_s"
-                    string="odoo order"
+                    string="Commandes Odoo"
                     domain="[('name', '=ilike', 'S%')]"/>
                 <separator/>
                 <filter
                     name="filter_wrong_number"
-                    string="Wrong number"
+                    string="Mauvais numéro"
                     domain="[('cancel_reason', '=', 'wrong_number')]"/>
                 <filter
                     name="filter_call_rejected"
-                    string="Call rejected"
+                    string="Appel rejeté"
                     domain="[('cancel_reason', '=', 'call_rejected')]"/>
                 <filter
                     name="filter_duplicated_order"
-                    string="Duplicated order"
+                    string="Commande en double"
                     domain="[('cancel_reason', '=', 'duplicated_order')]"/>
                 <filter
                     name="filter_out_of_coverage"
-                    string="Out of coverage"
+                    string="Hors couverture"
                     domain="[('cancel_reason', '=', 'out_of_coverage')]"/>
                 <filter
                     name="filter_out_of_stock"
-                    string="Out of stock"
+                    string="Rupture de stock"
                     domain="[('cancel_reason', '=', 'out_of_stock')]"/>
                 <filter
                     name="filter_no_reply"
-                    string="No reply"
+                    string="Pas de réponse"
                     domain="[('cancel_reason', '=', 'no_reply')]"/>
+
+                <filter
+                    name="filter_fake_order"
+                    string="Commande frauduleuse"
+                    domain="[('cancel_reason', '=', 'fake_order')]"/>
 
                 <separator/>
                 <filter
                     name="filter_line_busy"
-                    string="Line busy"
+                    string="Ligne occupée"
                     domain="[('status2', '=', 'line_busy')]"/>
                 <filter
                     name="filter_disconnected"
-                    string="Disconnected"
+                    string="Appel coupé"
                     domain="[('status2', '=', 'disconnected')]"/>
                 <filter
                     name="filter_callback_requested"
-                    string="Callback requested"
+                    string="Rappel demandé"
                     domain="[('status2', '=', 'callback_requested')]"/>
                 <filter
                     name="filter_no_reply"
-                    string="No reply"
+                    string="Pas de réponse"
                     domain="[('status2', '=', 'no_reply')]"/>
             </xpath>
         </field>

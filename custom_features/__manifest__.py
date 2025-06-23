@@ -1,7 +1,7 @@
 {
     'name': 'Custom Feature',
     'version': '1.0',
-    'depends': ['base', 'stock', 'sale', 'purchase'],  # Include other dependencies as needed
+    'depends': ['base', 'stock', 'sale', 'purchase', 'shipping_integration'],  # Include other dependencies as needed
     'data': [
         # Add your XML files here if any
         'security/ir.model.access.csv',
@@ -12,6 +12,7 @@
         'views/purchase_order_template.xml',
         'views/mrp_bom_addition_view.xml',
         'views/sale_order_view.xml',
+        'views/stock_picking_view.xml',
         'wizards/sale_order_cancel_confirm_view.xml',
         'reports/picking_labels.xml',
     ],

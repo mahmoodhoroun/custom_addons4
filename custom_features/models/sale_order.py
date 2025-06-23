@@ -11,20 +11,21 @@ class SaleOrder(models.Model):
     )
     customr_phone = fields.Char(string='Customer Phone', compute='_compute_customer_phone')
     cancel_reason = fields.Selection([
-        ('wrong_number', 'Wrong number'),
-        ('call_rejected', 'Call rejected'),
-        ('duplicated_order', 'Duplicated order'),
-        ('out_of_coverage', 'Out of coverage'),
-        ('out_of_stock', 'Out of stock'),
-        ('no_reply', 'No reply'),
-    ], string='Cancellation Reason', tracking=True)
+        ('wrong_number', 'Mauvais numéro'),
+        ('call_rejected', 'Appel rejeté'),
+        ('duplicated_order', 'Commande en double'),
+        ('out_of_coverage', 'Hors couverture'),
+        ('out_of_stock', 'Rupture de stock'),
+        ('no_reply', 'Pas de réponse'),
+        ('fake_order', 'Commande frauduleuse'),
+    ], string='Motif d\'annulation', tracking=True)
 
     status2 = fields.Selection([
-        ('line_busy', 'Line busy'),
-        ('disconnected', 'Disconnected'),
-        ('no_reply', 'No reply'),
-        ('callback_requested', 'Callback requested'),
-    ], string='Status2', tracking=True)
+        ('line_busy', 'Ligne occupée'),
+        ('disconnected', 'Appel coupé'),
+        ('no_reply', 'Pas de réponse'),
+        ('callback_requested', 'Rappel demandé'),
+    ], string='Résultat de l\'appel', tracking=True)
 
     def action_cancel_custom(self):
         """Override the standard cancel method to show the wizard"""
@@ -35,7 +36,7 @@ class SaleOrder(models.Model):
         # Otherwise, show the wizard
         return {
             'type': 'ir.actions.act_window',
-            'name': _('Select Cancellation Reason'),
+            'name': _('Selectionnez le motif dannulation'),
             'res_model': 'sale.order.cancel.confirm',
             'view_mode': 'form',
             'target': 'new',
@@ -49,6 +50,10 @@ class SaleOrder(models.Model):
         """Actual cancellation method called from the wizard"""
         return super(SaleOrder, self)._action_cancel()
 
+    def action_cancel(self):
+        """Override the standard cancel method to clear status2 field"""
+        self.write({'status2': False})
+        return super(SaleOrder, self).action_cancel()
     def _compute_customer_phone(self):
         for order in self:
             order.customr_phone = order.partner_id.phone or order.partner_id.mobile
@@ -63,7 +68,8 @@ class SaleOrder(models.Model):
 
     def action_confirm(self):
         res = super(SaleOrder, self).action_confirm()
-
+        self.write({'status2': False})
+        self.write({'cancel_reason': False})
         additional_products = []
         for line in self.order_line:
             product = line.product_template_id

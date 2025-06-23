@@ -13,7 +13,7 @@ class StockPicking(models.Model):
     _inherit = 'stock.picking'
     
     # Shipsy fields
-    shipsy_reference_number = fields.Char(string='Chronodiali Reference Number', copy=False, readonly=True)
+    shipsy_reference_number = fields.Char(string='ID Livraison Chrono', copy=False, readonly=True)
     shipsy_service_type = fields.Selection([
         ('NORMAL', 'Normal'),
         ('RETURN', 'Return')
@@ -29,7 +29,7 @@ class StockPicking(models.Model):
     shipsy_label = fields.Binary(string='Chronodiali Label', attachment=True, copy=False)
     shipsy_label_filename = fields.Char(string='Label Filename', copy=False)
     shipsy_is_cancelled = fields.Boolean(string='Is Cancelled in Chronodiali', default=False, copy=False)
-    shipsy_pickup_id = fields.Char(string='Chronodiali Pickup ID', copy=False, readonly=True)
+    shipsy_pickup_id = fields.Char(string='ID Ramassage Chrono', copy=False, readonly=True)
     shipsy_is_print = fields.Boolean(string='Is Print', default=False, copy=False)
     
     def _get_default_shipsy_connector(self):

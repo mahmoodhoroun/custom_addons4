@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Extend stock.picking form view to show label_printed field -->
+    <record id="view_picking_form_inherit_label_printed" model="ir.ui.view">
+        <field name="name">stock.picking.form.inherit.label.printed</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='origin']" position="after">
+                <field name="is_label_printed" readonly="1"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Add filter for label printed status in search view -->
+    <record id="view_picking_search_inherit_label_printed" model="ir.ui.view">
+        <field name="name">stock.picking.search.inherit.label.printed</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_internal_search"/>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='delivery']" position="after">
+                <separator/>
+                <filter string="Label Printed" name="label_printed" domain="[('is_label_printed', '=', True)]"/>
+                <filter string="Label Not Printed" name="label_not_printed" domain="[('is_label_printed', '=', False)]"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Add column to tree view -->
+    <record id="view_picking_tree_inherit_label_printed" model="ir.ui.view">
+        <field name="name">stock.picking.tree.inherit.label.printed</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.vpicktree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='print']" position="after">
+                <field name="is_label_printed"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>
