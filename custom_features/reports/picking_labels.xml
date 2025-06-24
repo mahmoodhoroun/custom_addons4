@@ -14,9 +14,13 @@
           
             <!-- Carrier information -->
             <div class="mb-2" style="font-size: 12px;">
-                <span><strong>Carrier: </strong></span>
+                <span><strong>Transporteur: </strong></span>
                 <span t-field="o.carrier_id.name" t-if="o.carrier_id"/>
                 <span t-if="not o.carrier_id">Flexible shipping</span>
+            </div>
+            <div class="mb-2" style="font-size: 12px;">
+                <span><strong>Numero de commande: </strong></span>
+                <span t-field="o.origin"/>
             </div>
             <br/>
             <br/>
@@ -25,9 +29,9 @@
             <table class="table table-sm" style="margin-bottom: 0; font-size: 10px;">
                 <thead>
                     <tr>
-                        <th style="width: 60%; border-top: none; padding: 1px;">Product</th>
-                        <th style="width: 20%; text-align: center; border-top: none; padding: 1px;">Qty</th>
-                        <th style="width: 20%; text-align: right; border-top: none; padding: 1px;">Location</th>
+                        <th style="width: 60%; border-top: none; padding: 1px;">Produit</th>
+                        <th style="width: 20%; text-align: center; border-top: none; padding: 1px;">Qte</th>
+                        <th style="width: 20%; text-align: right; border-top: none; padding: 1px;">Localisation</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -63,9 +67,13 @@
             
             <!-- Carrier information -->
             <div class="mb-2" style="font-size: 12px;">
-                <span><strong>Carrier:</strong> </span>
+                <span><strong>Transporteur:</strong> </span>
                 <span t-field="o.carrier_id.name" t-if="o.carrier_id"/>
                 <span t-if="not o.carrier_id">Flexible shipping</span>
+            </div>
+            <div class="mb-2" style="font-size: 12px;">
+                <span><strong>Numero de commande: </strong></span>
+                <span t-field="o.origin"/>
             </div>
             <br/>
             
@@ -73,9 +81,9 @@
             <table class="table table-sm" style="margin-bottom: 0; font-size: 10px;">
                 <thead>
                     <tr>
-                        <th style="width: 60%; border-top: none; padding: 1px;">Product</th>
-                        <th style="width: 20%; text-align: center; border-top: none; padding: 1px;">Qty</th>
-                        <th style="width: 20%; text-align: right; border-top: none; padding: 1px;">Location</th>
+                        <th style="width: 60%; border-top: none; padding: 1px;">Produit</th>
+                        <th style="width: 20%; text-align: center; border-top: none; padding: 1px;">Qte</th>
+                        <th style="width: 20%; text-align: right; border-top: none; padding: 1px;">Localisation</th>
                     </tr>
                 </thead>
                 <tbody>

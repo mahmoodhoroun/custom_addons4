@@ -9,7 +9,7 @@ class SaleOrder(models.Model):
     receipt_count = fields.Integer(
         string='Receipts Count', compute='_compute_receipt_count', store=True
     )
-    customr_phone = fields.Char(string='Customer Phone', compute='_compute_customer_phone')
+    customr_phone = fields.Char(string='Téléphone', compute='_compute_customer_phone', readonly=False)
     cancel_reason = fields.Selection([
         ('wrong_number', 'Mauvais numéro'),
         ('call_rejected', 'Appel rejeté'),
