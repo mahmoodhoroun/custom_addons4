@@ -36,7 +36,7 @@ class SaleOrder(models.Model):
         # Otherwise, show the wizard
         return {
             'type': 'ir.actions.act_window',
-            'name': _('Selectionnez le motif dannulation'),
+            'name': _('Selectionnez le motif d\'annulation'),
             'res_model': 'sale.order.cancel.confirm',
             'view_mode': 'form',
             'target': 'new',
