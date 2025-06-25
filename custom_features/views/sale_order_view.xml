@@ -110,7 +110,7 @@
 
             <xpath expr="//header" position="inside">
                 <button name="action_confirm"
-                        string="Confirm"
+                        string="Confirmer"
                         type="object"
                         class="btn-primary"/>
             </xpath>
