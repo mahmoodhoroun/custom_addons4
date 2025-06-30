@@ -14,6 +14,8 @@
         'views/sale_order_view.xml',
         'views/stock_picking_view.xml',
         'wizards/sale_order_cancel_confirm_view.xml',
+        'wizards/invoice_confirm_wizard_view.xml',
+        'views/account_move_view.xml',
         'reports/picking_labels.xml',
     ],
     'installable': True,

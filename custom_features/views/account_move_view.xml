@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Add the confirm button to the invoice tree view -->
+    <record id="view_invoice_tree_custom" model="ir.ui.view">
+        <field name="name">account.move.tree.custom</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_invoice_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//tree" position="attributes">
+                <attribute name="decoration-info">state == 'draft'</attribute>
+            </xpath>
+        </field>
+    </record>
+
+
+  <record id="account_move_tree_bulk_confirm" model="ir.ui.view">
+    <field name="name">account.move.tree.bulk.confirm</field>
+    <field name="model">account.move</field>
+    <field name="inherit_id" ref="account.view_invoice_tree"/>
+    <field name="arch" type="xml">
+      <xpath expr="//tree/header" position="inside">
+        <button name="action_bulk_confirm_invoices"
+                string="Bulk Confirm"
+                type="object"
+                class="btn-primary"
+                context="{'default_use_wizard': True}"/>
+      </xpath>
+    </field>
+  </record>
+  
+</odoo>

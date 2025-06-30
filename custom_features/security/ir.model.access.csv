@@ -1,3 +1,5 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_mrp_bom_addition_manager,mrp.bom.addition.access.manager,model_mrp_bom_addition,,1,1,1,1
 access_sale_order_cancel_confirm,access.sale.order.cancel.confirm,model_sale_order_cancel_confirm,,1,1,1,1
+access_bulk_confirm_invoice_wizard,access.bulk.confirm.invoice.wizard,model_bulk_confirm_invoice_wizard,,1,1,1,1
+access_bulk_confirm_invoice_line,access.bulk.confirm.invoice.line,model_bulk_confirm_invoice_line,,1,1,1,1
