@@ -1,26 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record id="view_bulk_confirm_wizard_form" model="ir.ui.view">
-    <field name="name">bulk.confirm.invoice.wizard.form</field>
-    <field name="model">bulk.confirm.invoice.wizard</field>
-    <field name="arch" type="xml">
-        <form string="Confirm Invoices">
-        <group>
-            <field name="invoice_line_ids">
-            <tree editable="bottom">
-                <field name="invoice_id" readonly="1"/>
-                <field name="invoice_date"/>
-                <field name="payment_term_id"/>
-            </tree>
-            </field>
-        </group>
-        <footer>
-            <button string="Confirm All" type="object" name="confirm_all" class="btn-primary"/>
-            <button string="Cancel" class="btn-secondary" special="cancel"/>
-        </footer>
-        </form>
-    </field>
+        <field name="name">bulk.confirm.invoice.wizard.form</field>
+        <field name="model">bulk.confirm.invoice.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Confirm Invoices">
+                <group>
+                    <field name="invoice_date"/>
+                    <field name="payment_term_id"/>
+                </group>
+                <footer>
+                    <button string="Confirm All" type="object" name="confirm_all" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
     </record>
-
-
 </odoo>

@@ -1,45 +1,35 @@
 from odoo import api, fields, models
 
 
-class BulkConfirmInvoiceLine(models.TransientModel):
-    _name = 'bulk.confirm.invoice.line'
-    _description = 'Per-Invoice Confirm Data'
-
-    wizard_id = fields.Many2one('bulk.confirm.invoice.wizard', required=True)
-    invoice_id = fields.Many2one('account.move', required=True, domain="[('move_type','=','out_invoice')]")
-    invoice_date = fields.Date(string="Invoice Date")
-    payment_term_id = fields.Many2one('account.payment.term', string="Payment Term")
-
-
-
 class BulkConfirmWizard(models.TransientModel):
     _name = 'bulk.confirm.invoice.wizard'
     _description = 'Bulk Confirm Invoices'
 
-    invoice_line_ids = fields.One2many('bulk.confirm.invoice.line', 'wizard_id', string="Invoices")
-
+    invoice_date = fields.Date(string="Invoice Date")
+    payment_term_id = fields.Many2one('account.payment.term', string="Payment Term")
+    
     @api.model
     def default_get(self, fields_list):
         res = super().default_get(fields_list)
+        # Get the first invoice's date and payment term as default values
         invoice_ids = self.env.context.get('default_invoice_ids', [])
-        lines = []
-        for inv in self.env['account.move'].browse(invoice_ids):
-            if inv.state != 'draft':
-                continue
-            lines.append((0, 0, {
-                'invoice_id': inv.id,
-                'invoice_date': inv.invoice_date,
-                'payment_term_id': inv.invoice_payment_term_id.id,
-            }))
-        res['invoice_line_ids'] = lines
+        if invoice_ids:
+            invoice = self.env['account.move'].browse(invoice_ids[0])
+            res['invoice_date'] = invoice.invoice_date
+            res['payment_term_id'] = invoice.invoice_payment_term_id.id
         return res
 
     def confirm_all(self):
-        for line in self.invoice_line_ids:
-            invoice = line.invoice_id
+        invoice_ids = self.env.context.get('active_ids', [])
+        invoices = self.env['account.move'].browse(invoice_ids)
+        
+        # Update all selected invoices with the same date and payment term
+        for invoice in invoices:
+            if invoice.state != 'draft':
+                continue
+                
             invoice.write({
-                'invoice_date': line.invoice_date,
-                'invoice_payment_term_id': line.payment_term_id.id,
+                'invoice_date': self.invoice_date,
+                'invoice_payment_term_id': self.payment_term_id.id,
             })
-            if invoice.state == 'draft':
-                invoice.action_post()
+            invoice.action_post()
