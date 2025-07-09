@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Copyright (C) 2015 DevIntelle Consulting Service Pvt.Ltd (<http://www.devintellecs.com>).
+
+For Module Support : devintelle@gmail.com  or Skype : devintelle
+ -->
+<odoo>
+    <record id="search_invoice_dev_pdf_invoices_as_zip" model="ir.ui.view">
+        <field name="name">search.invoice.dev.pdf.invoices.as.zip</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_account_invoice_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='draft']" position="before">
+                <field name="pdf_report_downloaded"/>
+                <filter name="report_downloaded" string="Report Downloaded" domain="[('pdf_report_downloaded','=',True)]"/>
+                <filter name="report_not_downloaded" string="Report not Downloaded" domain="[('pdf_report_downloaded','=',False)]"/>
+                <separator/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

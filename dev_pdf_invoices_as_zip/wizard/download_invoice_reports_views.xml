@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Copyright (C) 2015 DevIntelle Consulting Service Pvt.Ltd (<http://www.devintellecs.com>).
+
+For Module Support : devintelle@gmail.com  or Skype : devintelle
+ -->
+<odoo>
+    <record id="form_download_invoices_pdf_reports" model="ir.ui.view">
+        <field name="name">form.download.invoices.pdf.reports</field>
+        <field name="model">download.invoice.reports</field>
+        <field name="priority">1</field>
+        <field name="arch" type="xml">
+            <form string="Download PDF Reports">
+                <p>Click on <b>Download</b> to download report of selected Invoice(s) as Zip File or <br/>Use <b>Close Window</b> to close this window</p>
+                <group>
+                    <group>
+                        <field name="download_also"/>
+                    </group>
+                    <group>
+                        <field name="single_page_invoices"/>
+                    </group>
+                </group>
+                <footer>
+                    <button string="Download" name="download_invoice_pdf_reports" type="object" class="oe_highlight" icon="fa-download"/>&#160;&#160;
+                    <button string="Close Window" class="oe_link" special="cancel" />
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="form_dev_pdf_invoices_as_zip_on_screen_report" model="ir.ui.view">
+        <field name="name">form.dev.pdf.invoices.as.zip.on.screen.report</field>
+        <field name="model">download.invoice.reports</field>
+        <field name="priority">5</field>
+        <field name="arch" type="xml">
+            <form string="Download PDF Reports">
+                <group>
+                    <group>
+                        <field name="invoice_reports" readonly="1"/>
+                    </group>
+                    <group>
+                    </group>
+                </group>
+                <footer>
+                    <button string="Close Window" class="oe_link" special="cancel" />
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_download_invoices_pdf_reports" model="ir.actions.act_window">
+        <field name="name">Download PDF Reports</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">download.invoice.reports</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="account.model_account_move"/>
+        <field name="groups_id"  eval="[(4, ref('can_download_invoices_as_zip'))]"/>
+    </record>
+
+</odoo>

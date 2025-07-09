@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <data>
+        <record id="view_out_purchase_tree_inherit" model="ir.ui.view">
+            <field name="name">purchase.order.tree.inherit</field>
+            <field name="model">purchase.order</field>
+            <field name="inherit_id" ref="purchase.purchase_order_kpis_tree"/>
+            <field name="arch" type="xml">
+                <xpath expr="//tree" position="attributes">
+                    <attribute name="js_class">ocr_button_purchase</attribute>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="view_out_purchase_po_tree_inherit" model="ir.ui.view">
+            <field name="name">purchase.order.tree.inherit</field>
+            <field name="model">purchase.order</field>
+            <field name="inherit_id" ref="purchase.purchase_order_view_tree"/>
+            <field name="arch" type="xml">
+                <xpath expr="//tree" position="attributes">
+                    <attribute name="js_class">ocr_button_purchase</attribute>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="view_ocr_ai_purchase_inherit" model="ir.ui.view">
+            <field name="name">purchase.order.form.inherit</field>
+            <field name="model">purchase.order</field>
+            <field name="inherit_id" ref="purchase.purchase_order_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//form/sheet/notebook/page[@name='purchase_delivery_invoice']" position="after">
+                    <page string="OCR Details" invisible="not is_created_ocr">
+                        <group>
+                            <field name="is_created_ocr"/>
+                            <field name="ocr_response_text" string="Responded Data"/>
+                            <field name="ocr_attachment_id" string="Uploaded File"/>
+                        </group>
+                    </page>
+                </xpath>
+                <xpath expr="//group//group[1]" position="inside">
+                    <field name="is_created_ocr" invisible="1"/>
+                </xpath>
+            </field>
+        </record>
+
+    </data>
+</odoo>
