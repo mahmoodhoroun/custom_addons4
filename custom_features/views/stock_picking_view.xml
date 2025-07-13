@@ -12,19 +12,19 @@
         </field>
     </record>
 
-    <!-- Add filter for label printed status in search view -->
-    <!-- <record id="view_picking_search_inherit_label_printed" model="ir.ui.view">
-        <field name="name">stock.picking.search.inherit.label.printed</field>
+    <!-- Add filter for label printed status, Cathedis and Chronodiali in search view -->
+    <record id="view_picking_search_inherit_custom_features" model="ir.ui.view">
+        <field name="name">stock.picking.search.inherit.custom_features</field>
         <field name="model">stock.picking</field>
         <field name="inherit_id" ref="stock.view_picking_internal_search"/>
         <field name="arch" type="xml">
-            <xpath expr="//filter[@name='delivery']" position="after">
+            <xpath expr="//filter[@name='planning_issues']" position="after">
                 <separator/>
-                <filter string="Label Printed" name="label_printed" domain="[('is_label_printed', '=', True)]"/>
-                <filter string="Label Not Printed" name="label_not_printed" domain="[('is_label_printed', '=', False)]"/>
+                <filter string="Cathedis" name="cathedis_filter" domain="[('delivery_id', '!=', False)]"/>
+                <filter string="Chronodiali" name="chronodiali_filter" domain="[('shipsy_reference_number', '!=', False)]"/>
             </xpath>
         </field>
-    </record> -->
+    </record>
 
     <!-- Add column to tree view -->
     <record id="view_picking_tree_inherit_label_printed" model="ir.ui.view">

@@ -1,7 +1,7 @@
 {
     'name': 'Custom Feature',
     'version': '1.0',
-    'depends': ['base', 'stock', 'sale', 'purchase', 'product', 'shipping_integration'],  # Include other dependencies as needed
+    'depends': ['base', 'stock', 'sale', 'purchase', 'product', 'shipping_integration', 'shipsy_shipping_connector'],  # Include other dependencies as needed
     'data': [
         # Add your XML files here if any
         'security/ir.model.access.csv',
