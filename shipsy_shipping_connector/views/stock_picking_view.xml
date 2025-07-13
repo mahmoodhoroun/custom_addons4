@@ -7,22 +7,12 @@
         <field name="inherit_id" ref="stock.view_picking_form"/>
         <field name="arch" type="xml">
             <xpath expr="//header" position="inside">
-                <button name="action_send_to_shipsy" 
+                <!-- <button name="action_send_to_shipsy" 
                         string="Livraison Chrono" 
                         type="object" 
                         class="oe_highlight"
-                        invisible="not shipsy_connector_id or shipsy_reference_number"/>
-                <button name="action_get_shipsy_label" 
-                        string="Etiquettes Chronodiali" 
-                        type="object" 
-                        class="btn-secondary"
-                        invisible="not shipsy_reference_number"/>
-                <button name="action_cancel_shipsy_delivery" 
-                        string="Annuler Chronodiali" 
-                        type="object" 
-                        class="btn-secondary"
-                        invisible="not shipsy_reference_number or shipsy_is_cancelled"
-                        confirm="Are you sure you want to cancel this delivery in Chronodiali?"/>
+                        invisible="not shipsy_connector_id or shipsy_reference_number"/> -->
+               
             </xpath>
             <xpath expr="//page[@name='extra']" position="after">
                 <page string="Chronodiali Shipping" invisible="picking_type_code != 'outgoing'">
@@ -40,6 +30,18 @@
                             <field name="shipsy_is_print" readonly="1"/>
                             <field name="shipsy_is_cancelled" readonly="1"/>
                         </group>
+                        <group>
+                            <button name="action_get_shipsy_label" 
+                                    string="Etiquettes Chronodiali" 
+                                    type="object" 
+                                    class="btn-secondary"
+                                    invisible="not shipsy_reference_number"/>
+                            <button name="action_cancel_shipsy_delivery" 
+                                    string="Annuler Chronodiali" 
+                                    type="object" 
+                                    class="btn-secondary"
+                                    invisible="not shipsy_reference_number or shipsy_is_cancelled"
+                                    confirm="Are you sure you want to cancel this delivery in Chronodiali?"/>                        </group>
                     </group>
                 </page>
             </xpath>
