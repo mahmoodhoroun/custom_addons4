@@ -9,6 +9,7 @@
             <xpath expr="//field[@name='partner_id']" position="after">
 <!--                <field name="receive_products"></field>-->
                     <field name="customr_phone" widget="phone"/>
+                    <!-- <field name="sale_id"/> -->
             </xpath>
             
             <!-- Add cancel reason field -->
@@ -21,7 +22,7 @@
             </xpath>
             <xpath expr="//button[@name='action_cancel']" position="after">
                 <button name="action_cancel_custom" string="Annuler" type="object" class="oe_highlight" invisible="state == 'cancel'"/>
-            </xpath>
+            </xpath>     
         </field>
     </record>
     <record id="view_sale_order_filter_custom" model="ir.ui.view">

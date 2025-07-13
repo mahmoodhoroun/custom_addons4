@@ -1,5 +1,7 @@
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError
+import logging
+_logger = logging.getLogger(__name__)
 
 class SaleOrder(models.Model):
     _inherit = 'sale.order'
@@ -26,7 +28,7 @@ class SaleOrder(models.Model):
         ('no_reply', 'Pas de réponse'),
         ('callback_requested', 'Rappel demandé'),
     ], string='Résultat de l\'appel', tracking=True)
-
+    
     def action_cancel_custom(self):
         """Override the standard cancel method to show the wizard"""
         # If we're bypassing the wizard (coming from the wizard itself), call the super method
@@ -67,9 +69,15 @@ class SaleOrder(models.Model):
             order.receipt_count = len(incoming_receipts)
 
     def action_confirm(self):
+        # First handle standard confirmation to create initial deliveries
         res = super(SaleOrder, self).action_confirm()
         self.write({'status2': False})
         self.write({'cancel_reason': False})
+        
+        # After standard confirmation, handle separate deliveries for products with separate_delivery_per_unit enabled
+        # This needs to run after super() because we need the initial deliveries to be created
+        self._create_separate_deliveries()
+        
         additional_products = []
         for line in self.order_line:
             product = line.product_template_id
@@ -148,3 +156,77 @@ class SaleOrder(models.Model):
         action['domain'] = [('id', 'in', self.receipt_ids.ids)]
         action['context'] = dict(self.env.context, create=False)
         return action
+
+
+    
+    def _create_separate_deliveries(self):
+        """
+        Create separate deliveries for products that have separate_delivery_per_unit enabled.
+        This method modifies existing delivery orders to split quantities into separate deliveries.
+        """
+        # First check if any order lines have products with separate_delivery_per_unit enabled
+        has_separate_delivery_products = False
+        for line in self.order_line:
+            product_tmpl = line.product_id.product_tmpl_id
+            if product_tmpl.separate_delivery_per_unit and line.product_uom_qty > 1:
+                has_separate_delivery_products = True
+                break
+                
+        if not has_separate_delivery_products:
+            return
+            
+        # Get all delivery pickings for this sale order
+        delivery_pickings = self.picking_ids.filtered(lambda p: p.picking_type_id.code == 'outgoing')
+        
+        if not delivery_pickings:
+            # No deliveries created yet, nothing to do
+            return
+            
+        for picking in delivery_pickings:
+            moves_to_split = []
+            
+            # Find moves that need to be split (products with separate_delivery_per_unit = True)
+            for move in picking.move_ids_without_package:
+                # Double check with the product template directly to ensure we have the right value
+                product_tmpl = self.env['product.template'].browse(move.product_id.product_tmpl_id.id)
+                if product_tmpl.separate_delivery_per_unit and move.product_uom_qty > 1:
+                    moves_to_split.append(move)
+            
+            # Process each move that needs splitting
+            for move in moves_to_split:
+                original_qty = int(move.product_uom_qty)
+                
+                # Update the original move to have quantity 1
+                move.write({'product_uom_qty': 1})
+                
+                # Create separate pickings for the remaining quantities
+                for i in range(1, original_qty):
+                    # Create a new picking for each additional unit
+                    new_picking_vals = {
+                        'picking_type_id': picking.picking_type_id.id,
+                        'location_id': picking.location_id.id,
+                        'location_dest_id': picking.location_dest_id.id,
+                        'origin': picking.origin,
+                        'partner_id': picking.partner_id.id,
+                        'sale_id': self.id,
+                        'move_ids_without_package': [(0, 0, {
+                            'product_id': move.product_id.id,
+                            'product_uom_qty': 1,
+                            'product_uom': move.product_uom.id,
+                            'name': move.name,
+                            'location_id': picking.location_id.id,
+                            'location_dest_id': picking.location_dest_id.id,
+                            'sale_line_id': move.sale_line_id.id if move.sale_line_id else False,
+                            'procure_method': 'make_to_stock',
+                            'state': 'draft',
+                        })]
+                    }
+                    # Create the new picking
+                    new_picking = self.env['stock.picking'].create(new_picking_vals)
+                    
+                    # Explicitly set the sale_id field to ensure the relationship is properly established
+                    new_picking.write({'sale_id': self.id})
+                                        
+                    # Confirm the new picking to make it ready
+                    if new_picking.state == 'draft':
+                        new_picking.action_confirm()
