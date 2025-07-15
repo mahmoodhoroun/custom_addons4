@@ -474,3 +474,15 @@ class StockPicking(models.Model):
         except Exception as e:
             _logger.error('Shipsy API error: %s', str(e))
             raise UserError(_('Error connecting to Shipsy API: %s') % str(e))
+
+
+    def show_action_shipsy_pickup_wizard(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'res_model': 'shipsy.pickup.wizard',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {'default_picking_id': self.id},
+        }
+        

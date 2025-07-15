@@ -20,6 +20,8 @@ class SaleOrder(models.Model):
         ('out_of_stock', 'Rupture de stock'),
         ('no_reply', 'Pas de réponse'),
         ('fake_order', 'Commande frauduleuse'),
+        ('modification_de_commande', 'Modification de commande'),
+        ('annulee_sans_reponse', 'Annulée sans réponse'),
     ], string='Motif d\'annulation', tracking=True)
 
     status2 = fields.Selection([
@@ -29,6 +31,34 @@ class SaleOrder(models.Model):
         ('callback_requested', 'Rappel demandé'),
     ], string='Résultat de l\'appel', tracking=True)
     
+    delivery_ids = fields.One2many('stock.picking', 'sale_id', string="Delivery IDs")
+    delivery_id = fields.Char(string="Delivery ID", compute='_compute_delivery_id', search='_search_delivery_id', store=False)
+    
+    @api.depends('delivery_ids')
+    def _compute_delivery_id(self):
+        for order in self:
+            # Get all delivery pickings for this order
+            pickings = order.delivery_ids
+            # Collect all delivery IDs (prioritize delivery_id, fallback to shipsy_reference_number)
+            delivery_ids = []
+            for picking in pickings:
+                # Use delivery_id if available, otherwise use shipsy_reference_number
+                delivery_id = picking.delivery_id or picking.shipsy_reference_number
+                if delivery_id:
+                    delivery_ids.append(delivery_id)
+            
+            # Join all delivery IDs with commas
+            order.delivery_id = ', '.join(delivery_ids) if delivery_ids else False
+    
+    @api.model
+    def _search_delivery_id(self, operator, value):
+        # Search in both delivery_id and shipsy_reference_number fields
+        pickings = self.env['stock.picking'].search([
+            '|',
+            ('delivery_id', operator, value),
+            ('shipsy_reference_number', operator, value)
+        ])
+        return [('id', 'in', pickings.mapped('sale_id').ids)]
     def action_cancel_custom(self):
         """Override the standard cancel method to show the wizard"""
         # If we're bypassing the wizard (coming from the wizard itself), call the super method
@@ -198,6 +228,7 @@ class SaleOrder(models.Model):
                 
                 # Update the original move to have quantity 1
                 move.write({'product_uom_qty': 1})
+                move.write({'quantity': 1})
                 
                 # Create separate pickings for the remaining quantities
                 for i in range(1, original_qty):

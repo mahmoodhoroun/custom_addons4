@@ -33,6 +33,8 @@
                         <field name="allowOpening" invisible="picking_type_id.code == 'outgoing'"/>
 
                         <field name="rangeWeight" invisible="picking_type_id.code == 'outgoing'"/>
+                        <field name="declaredValue" invisible="picking_type_id.code == 'outgoing'"/>
+                        <field name="comment" invisible="picking_type_id.code == 'outgoing'"/>
                     </group>
                     <group>
                         <button name="action_generate_delivery_pdf" type="object" string="Etiquettes Cathedis" class="btn-primary"/>
@@ -47,16 +49,41 @@
         <field name="model">stock.picking</field>
         <field name="inherit_id" ref="stock.vpicktree"/>
         <field name="arch" type="xml">
-            <xpath expr="//header" position="inside">
+            <!-- <xpath expr="//header" position="inside">
                 <button name="call_shipping_api" type="object" string="Livraison Cathedis" class="btn-primary" />
                 <button name="action_generate_delivery_pdf" type="object" string="Etiquettes Cathedis" class="btn-primary" />
                 <button name="action_refresh_pickup_request" type="object" string="Ramassage Cathedis" class="btn-primary" />
 
-            </xpath>
+            </xpath> -->
             <xpath expr="//field[@name='state']" position="after">
                 <field name="new_state" optional="show" widget="badge" string="Statut Cathedis"/>
                 <field name="print" optional="show" widget="boolean"/>
             </xpath>
         </field>
+    </record>
+    
+    <record id="action_send_multiple_to_cathedis" model="ir.actions.server">
+        <field name="name">Livraison Cathedis</field>
+        <field name="model_id" ref="stock.model_stock_picking"/>
+        <field name="binding_model_id" ref="stock.model_stock_picking"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">action = records.call_shipping_api()</field>
+    </record>
+    <record id="action_generate_delivery_pdf" model="ir.actions.server">
+        <field name="name">Etiquettes Cathedis</field>
+        <field name="model_id" ref="stock.model_stock_picking"/>
+        <field name="binding_model_id" ref="stock.model_stock_picking"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">action = records.action_generate_delivery_pdf()</field>
+    </record>
+    <record id="action_refresh_pickup_request" model="ir.actions.server">
+        <field name="name">Ramassage Cathedis</field>
+        <field name="model_id" ref="stock.model_stock_picking"/>
+        <field name="binding_model_id" ref="stock.model_stock_picking"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">action = records.action_refresh_pickup_request()</field>
     </record>
 </odoo>

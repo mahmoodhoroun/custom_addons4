@@ -12,8 +12,8 @@
     'data': [
         'security/ir.model.access.csv',
         'views/shipsy_connector_views.xml',
-        'views/shipsy_pickup_wizard_view.xml',
         'views/stock_picking_view.xml',
+        'views/shipsy_pickup_wizard_view.xml',
     ],
     'installable': True,
     'application': False,

@@ -21,6 +21,9 @@ class StockPicking(models.Model):
     caution = fields.Char(string="Caution", default="0")
     fragile = fields.Char(string="Fragile", default="0")
     allowOpening = fields.Char(string="Allow Opening", default="1")
+
+    declaredValue = fields.Char(string="Declared Value", default="0")
+    comment = fields.Char(string="Comment", default="")
     rangeWeight = fields.Selection(selection=[
             ("ONE_FIVE", "Between 1Kg and 5Kg"),
             ("SIX_TEN", "Between 6Kg and 10Kg"),
@@ -62,10 +65,10 @@ class StockPicking(models.Model):
                                 "amount": str(rec.sale_id.amount_total),
                                 "caution": rec.caution,
                                 "fragile": rec.fragile,
-                                "declaredValue": str(rec.sale_id.amount_total),
+                                "declaredValue": rec.declaredValue,
                                 "address": rec.partner_id.street or "",
                                 "nomOrder": rec.sale_id.name,
-                                "comment": "",
+                                "comment": rec.comment,
                                 "rangeWeight": str(rec.rangeWeight),
                                 "subject": rec.subject,
                                 "paymentType": rec.paymentType,

@@ -7,6 +7,23 @@ class StockPicking(models.Model):
     
     is_label_printed = fields.Boolean(string='Étiquette de prélèvement', default=False, 
                                      help="Indicates if the picking label has been printed")
+    expedie = fields.Boolean(string='Expedié', default=False, 
+                                     help="Indicates if the picking has been expedited", compute='_compute_expedie')
+    ramasse = fields.Boolean(string='Ramassé', default=False, 
+                                     help="Indicates if the picking has been ramassed", compute='_compute_ramasse')
+    def _compute_expedie(self):
+        for picking in self:
+            if picking.delivery_id or picking.shipsy_reference_number:
+                picking.expedie = True
+            else:
+                picking.expedie = False
+
+    def _compute_ramasse(self):
+        for picking in self:
+            if picking.new_state == 'delivery_pickup' or picking.shipsy_pickup_id:
+                picking.ramasse = True
+            else:
+                picking.ramasse = False
 
     def create_delivery_shipping(self):
         for picking in self:

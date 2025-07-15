@@ -38,6 +38,11 @@
             <xpath expr="//field[@name='print']" position="after">
                 <field name="is_label_printed"/>
             </xpath>
+            <xpath expr="//field[@name='state']" position="after">
+                <field name="expedie"/>
+                <field name="ramasse"/>
+            </xpath>
+            
         </field>
     </record>
 </odoo>

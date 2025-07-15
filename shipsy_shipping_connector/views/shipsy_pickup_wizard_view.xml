@@ -23,11 +23,11 @@
     </record>
 
       <record id="action_shipsy_pickup_wizard" model="ir.actions.act_window">
-        <field name="name">Create Chronodiali Pickup</field>
+        <field name="name">Ramassage Chrono</field>
         <field name="res_model">shipsy.pickup.wizard</field>
         <field name="view_mode">form</field>
         <field name="target">new</field>
-        <!-- <field name="binding_model_id" ref="stock.model_stock_picking"/> -->
+        <field name="binding_model_id" eval="False"/> 
         <!-- <field name="binding_view_types">list</field> -->
     </record>
 

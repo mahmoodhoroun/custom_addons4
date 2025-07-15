@@ -13,6 +13,8 @@ class SaleOrderCancelConfirm(models.TransientModel):
         ('out_of_stock', 'Rupture de stock'),
         ('no_reply', 'Pas de réponse'),
         ('fake_order', 'Commande frauduleuse'),
+        ('modification_de_commande', 'Modification de commande'),
+        ('annulee_sans_reponse', 'Annulée sans réponse'),
     ], string='Motif d\'annulation', required=True)
     confirmation_message = fields.Text(string='Confirmation Message', readonly=True)
     
