@@ -13,11 +13,11 @@ class AccountMove(models.Model):
     
     def _upload_to_google_drive(self, file_data, filename, backup_config=None):
         """Upload a file to Google Drive using the configured settings from auto_database_backup"""
-        # If no backup_config is provided, find one
+        # If backup_config is not provided, find the first active Google Drive backup configuration
         if not backup_config:
             backup_config = self.env['db.backup.configure'].search([
                 ('backup_destination', '=', 'google_drive'),
-                ('gdrive_refresh_token', '!=', False),  # Use actual field instead of computed field
+                ('gdrive_refresh_token', '!=', False),
                 ('google_drive_folder_key', '!=', False)
             ], limit=1)
         
@@ -30,11 +30,12 @@ class AccountMove(models.Model):
             return {'error': 'Google Drive folder ID not configured'}
             
         # Check if token is expired and refresh if needed
-        if backup_config.gdrive_token_validity <= fields.Datetime.now():
-            try:
+        try:
+            if not backup_config.gdrive_access_token or \
+               (backup_config.gdrive_token_validity and backup_config.gdrive_token_validity <= fields.Datetime.now()):
                 backup_config.generate_gdrive_refresh_token()
-            except Exception as e:
-                return {'error': f'Failed to refresh Google Drive token: {str(e)}'}
+        except Exception as e:
+            return {'error': f'Failed to refresh Google Drive token: {str(e)}'}
             
         # Upload file to Google Drive
         headers = {
@@ -94,6 +95,9 @@ class AccountMove(models.Model):
         zip_data_binary = zip_buffer.read()
         zip_data = base64.b64encode(zip_data_binary)
         
+        # Store a copy of the raw data for Google Drive upload
+        raw_zip_data = zip_data_binary
+        
         # Create attachment for download
         attachment = self.env['ir.attachment'].create({
             'name': 'Invoices.zip',
@@ -104,51 +108,28 @@ class AccountMove(models.Model):
         
         # Check if auto_database_backup module is installed
         if self.env['ir.module.module'].sudo().search([('name', '=', 'auto_database_backup'), ('state', '=', 'installed')]):
-            # Get all Google Drive configurations
-            backup_config = self.env['db.backup.configure'].search([
-                ('backup_destination', '=', 'google_drive'),
-                ('gdrive_refresh_token', '!=', False),  # Use actual field instead of computed field
-                ('google_drive_folder_key', '!=', False)
-            ], limit=1)
-            # Only try to upload if we found a valid configuration
-            if backup_config:
-                try:
-                    # Create a filename with timestamp
-                    timestamp = fields.Datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-                    filename = f"Invoices_{timestamp}.zip"
+            # Try to upload to Google Drive
+            try:
+                # Find Google Drive configurations with tokens
+                backup_config = self.env['db.backup.configure'].search([
+                    ('backup_destination', '=', 'google_drive'),
+                    ('gdrive_refresh_token', '!=', False),  # Check for refresh token instead of computed field
+                    ('google_drive_folder_key', '!=', False)
+                ], limit=1)
+                
+                if not backup_config:
+                    raise ValidationError("No valid Google Drive configuration found")
                     
-                    # Upload to Google Drive
-                    drive_response = self._upload_to_google_drive(zip_data_binary, filename, backup_config)
-                    
-                    # Check if there was an error
-                    if drive_response and 'error' in drive_response:
-                        message = f"Failed to upload to Google Drive: {drive_response['error']}"
-                        self.env['bus.bus']._sendone(
-                            self.env.user.partner_id, 
-                            'notification', 
-                            {
-                                'type': 'warning',
-                                'title': "Google Drive Upload",
-                                'message': message,
-                                'sticky': True,
-                            }
-                        )
-                    else:
-                        # Show success message
-                        message = "Invoices successfully uploaded to Google Drive"
-                        self.env['bus.bus']._sendone(
-                            self.env.user.partner_id, 
-                            'notification', 
-                            {
-                                'type': 'success',
-                                'title': "Google Drive Upload",
-                                'message': message,
-                                'sticky': False,
-                            }
-                        )
-                except Exception as e:
-                    # Log the error but don't stop the download process
-                    message = f"Failed to upload to Google Drive: {str(e)}"
+                # Create a filename with timestamp
+                timestamp = fields.Datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+                filename = f"Invoices_{timestamp}.zip"
+                
+                # Upload to Google Drive - use the raw binary data, not base64 encoded
+                drive_response = self._upload_to_google_drive(raw_zip_data, filename, backup_config)
+                
+                # Check if there was an error
+                if drive_response and 'error' in drive_response:
+                    message = f"Failed to upload to Google Drive: {drive_response['error']}"
                     self.env['bus.bus']._sendone(
                         self.env.user.partner_id, 
                         'notification', 
@@ -159,16 +140,30 @@ class AccountMove(models.Model):
                             'sticky': True,
                         }
                     )
-            else:
-                # Notify user that Google Drive is not properly configured
+                else:
+                    # Show success message
+                    message = "Invoices successfully uploaded to Google Drive"
+                    self.env['bus.bus']._sendone(
+                        self.env.user.partner_id, 
+                        'notification', 
+                        {
+                            'type': 'success',
+                            'title': "Google Drive Upload",
+                            'message': message,
+                            'sticky': False,
+                        }
+                    )
+            except Exception as e:
+                # Log the error but don't stop the download process
+                message = f"Failed to upload to Google Drive: {str(e)}"
                 self.env['bus.bus']._sendone(
                     self.env.user.partner_id, 
                     'notification', 
                     {
-                        'type': 'info',
+                        'type': 'warning',
                         'title': "Google Drive Upload",
-                        'message': "Google Drive not configured properly. ZIP file will be downloaded only.",
-                        'sticky': False,
+                        'message': message,
+                        'sticky': True,
                     }
                 )
         
