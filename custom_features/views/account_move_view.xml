@@ -24,6 +24,11 @@
                 type="object"
                 class="btn-primary"
                 context="{'default_use_wizard': True}"/>
+        <button name="action_print_invoices_zip"
+                string="Print as ZIP"
+                type="object"
+                class="btn-secondary"
+                icon="fa-file-archive-o"/>
       </xpath>
     </field>
   </record>
