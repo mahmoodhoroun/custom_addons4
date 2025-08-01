@@ -152,7 +152,7 @@ class WhatsAppAccount(models.Model):
                 ('state', 'not in', ['outgoing', 'error', 'cancel']),
             ], limit=1, order='id desc')
         return self.env['discuss.channel'].sudo()._get_whatsapp_channel(
-            whatsapp_number=sender_mobile_formatted or '',
+            whatsapp_number=sender_mobile_formatted,
             wa_account_id=self,
             sender_name=sender_name,
             create_if_not_found=create_if_not_found,
@@ -196,7 +196,7 @@ class WhatsAppAccount(models.Model):
                 'message_type': 'whatsapp_message',
                 'author_id': channel.whatsapp_partner_id.id,
                 'subtype_xmlid': 'mail.mt_comment',
-                'parent_id': parent_id.id if parent_id else None,
+                'parent_id': parent_id.id if parent_id else None
             }
             if message_type == 'text':
                 kwargs['body'] = plaintext2html(messages['text']['body'])
@@ -204,14 +204,13 @@ class WhatsAppAccount(models.Model):
                 kwargs['body'] = messages['button']['text']
             elif message_type in ('document', 'image', 'audio', 'video', 'sticker'):
                 filename = messages[message_type].get('filename')
-                is_voice = messages[message_type].get('voice')
                 mime_type = messages[message_type].get('mime_type')
                 caption = messages[message_type].get('caption')
                 datas = wa_api._get_whatsapp_document(messages[message_type]['id'])
                 if not filename:
                     extension = mimetypes.guess_extension(mime_type) or ''
                     filename = message_type + extension
-                kwargs['attachments'] = [(filename, datas, {'voice': is_voice})]
+                kwargs['attachments'] = [(filename, datas)]
                 if caption:
                     kwargs['body'] = plaintext2html(caption)
             elif message_type == 'location':
@@ -222,7 +221,7 @@ class WhatsAppAccount(models.Model):
                 if messages['location'].get('name'):
                     body += Markup("<br/>{location_name}").format(location_name=messages['location']['name'])
                 if messages['location'].get('address'):
-                    body += Markup("<br/>{location_address}").format(location_address=messages['location']['address'])
+                    body += Markup("<br/>{location_address}").format(location_name=messages['location']['address'])
                 kwargs['body'] = body
             elif message_type == 'contacts':
                 body = ""

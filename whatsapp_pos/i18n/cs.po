@@ -5,8 +5,6 @@
 # Translators:
 # Wil Odoo, 2023
 # Jakub Smolka, 2023
-# Stanislav Kurinec, 2025
-# Marta Wacławek, 2025
 # 
 msgid ""
 msgstr ""
@@ -14,7 +12,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-10-26 22:22+0000\n"
 "PO-Revision-Date: 2023-10-26 23:10+0000\n"
-"Last-Translator: Marta Wacławek, 2025\n"
+"Last-Translator: Jakub Smolka, 2023\n"
 "Language-Team: Czech (https://app.transifex.com/odoo/teams/41243/cs/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -52,7 +50,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:whatsapp_pos.field_pos_config__invoice_template_id
 #: model:ir.model.fields,field_description:whatsapp_pos.field_res_config_settings__pos_invoice_template_id
 msgid "Invoice template"
-msgstr "Šablona faktury"
+msgstr ""
 
 #. module: whatsapp_pos
 #: model:ir.model,name:whatsapp_pos.model_pos_config
@@ -82,7 +80,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:whatsapp_pos.field_pos_config__receipt_template_id
 #: model:ir.model.fields,field_description:whatsapp_pos.field_res_config_settings__pos_receipt_template_id
 msgid "Receipt template"
-msgstr "Šablona potvrzení"
+msgstr ""
 
 #. module: whatsapp_pos
 #: model_terms:ir.ui.view,arch_db:whatsapp_pos.res_config_settings_view_form

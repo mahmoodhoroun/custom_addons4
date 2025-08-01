@@ -115,11 +115,18 @@ class WhatsAppComposer(models.TransientModel):
             if composer.batch_mode:
                 invalid_phone_number_count = 0
                 for rec in records:
-                    mobile_number = rec._whatsapp_phone_format(fpath=composer.wa_template_id.phone_field)
+                    mobile_number = rec._find_value_from_field_path(composer.wa_template_id.phone_field)
+                    mobile_number = wa_phone_validation.wa_phone_format(
+                        rec, number=mobile_number or '',
+                        raise_exception=False,
+                    ) if mobile_number else False
                     if not mobile_number:
                         invalid_phone_number_count += 1
             elif composer.phone:
-                sanitize_number = records._whatsapp_phone_format(number=composer.phone)
+                sanitize_number = wa_phone_validation.wa_phone_format(
+                    records, number=composer.phone,
+                    raise_exception=False,
+                )
                 invalid_phone_number_count = 1 if not sanitize_number else 0
             else:
                 invalid_phone_number_count = 1
@@ -191,9 +198,7 @@ class WhatsAppComposer(models.TransientModel):
                         rec.header_text_1 = header_param.demo_value
             if rec.wa_template_id.variable_ids:
                 free_text_count = 1
-                filtered_variables = rec.wa_template_id.variable_ids.filtered(lambda line: line.line_type == 'body' and line.field_type == 'free_text')
-                sorted_variables = filtered_variables.sorted(key=lambda var: var._extract_variable_index())
-                for param in sorted_variables:
+                for param in rec.wa_template_id.variable_ids.filtered(lambda line: line.line_type == 'body' and line.field_type == 'free_text'):
                     # This is just a hack to work on stable version as we can't force view update on stable.
                     # As we need to change view, it will be done properly on master.
                     if not rec._origin[f"free_text_{free_text_count}"]:
@@ -228,29 +233,18 @@ class WhatsAppComposer(models.TransientModel):
                     _("User mobile number required in template but no value set on user profile.")
                 )
         free_text_json = self._get_text_free_json()
-        message_vals_all = []
+        message_vals = []
         raise_exception = False if self.batch_mode or force_send_by_cron else True
         for rec in records:
-            mobile_number = None
-            if self.batch_mode:
-                formatted_number_wa = rec._whatsapp_phone_format(
-                    fpath=self.wa_template_id.phone_field,
-                    raise_on_format_error=raise_exception,
-                )
-                mobile_number = rec.mapped(self.wa_template_id.phone_field)[0]
-            elif not mobile_number:
-                mobile_number = self.phone
-                formatted_number_wa = rec._whatsapp_phone_format(
-                    number=mobile_number, raise_on_format_error=raise_exception,
-                )
-
-            message_vals = {}
-
-            if not formatted_number_wa:
-                message_vals.update({
-                    'failure_type': 'phone_invalid',
-                    'state': 'error',
-                })
+            mobile_number = rec._find_value_from_field_path(self.wa_template_id.phone_field) if self.batch_mode else self.phone
+            formatted_number_wa = wa_phone_validation.wa_phone_format(
+                rec, number=mobile_number,
+                force_format="WHATSAPP",
+                raise_exception=raise_exception,
+            )
+            # Continue to the next iteration if the formatted_number_wa is False and not forced to send by cron parameter.
+            if not (formatted_number_wa or force_send_by_cron):
+                continue
 
             body = self._get_html_preview_whatsapp(rec=rec)
             post_values = {
@@ -266,7 +260,7 @@ class WhatsAppComposer(models.TransientModel):
                     dict(post_values, res_id=rec.id, model=self.res_model,
                          subtype_id=self.env['ir.model.data']._xmlid_to_res_id("mail.mt_note"))
                 )
-            message_vals_all.append(message_vals | {
+            message_vals.append({
                 'mail_message_id': message.id,
                 'mobile_number': mobile_number,
                 'mobile_number_formatted': formatted_number_wa,
@@ -274,8 +268,8 @@ class WhatsAppComposer(models.TransientModel):
                 'wa_template_id': self.wa_template_id.id,
                 'wa_account_id': self.wa_template_id.wa_account_id.id,
             })
-        if message_vals_all:
-            messages = self.env['whatsapp.message'].create(message_vals_all)
+        if message_vals:
+            messages = self.env['whatsapp.message'].create(message_vals)
             messages._send(force_send_by_cron=force_send_by_cron)
             return messages
         return self.env["whatsapp.message"]
@@ -302,8 +296,7 @@ class WhatsAppComposer(models.TransientModel):
         self.ensure_one()
         template_variables_value = self.wa_template_id.variable_ids._get_variables_value(rec)
         text_vars = self.wa_template_id.variable_ids.filtered(lambda var: var.field_type == 'free_text')
-        body_text_vars = text_vars.filtered(lambda var: var.line_type == 'body').sorted(key=lambda var: var._extract_variable_index())
-        for var_index, body_text_var in zip(range(1, self.number_of_free_text + 1), body_text_vars):
+        for var_index, body_text_var in zip(range(1, self.number_of_free_text + 1), text_vars.filtered(lambda var: var.line_type == 'body')):
             free_text_x = self[f'free_text_{var_index}']
             if free_text_x:
                 template_variables_value[f'body-{body_text_var.name}'] = free_text_x

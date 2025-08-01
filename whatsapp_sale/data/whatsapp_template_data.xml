@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <odoo noupdate="1">
-    <record id="whatsapp_template_sale_order" model="whatsapp.template" forcecreate="0">
+    <record id="whatsapp_template_sale_order" model="whatsapp.template">
         <field name="name">Sale Order</field>
         <field name="template_name">sale</field>
         <field name="lang_code">en</field>
@@ -8,7 +8,7 @@
         <field name="header_type">document</field>
         <field name="report_id" ref="sale.action_report_saleorder"/>
         <field name="footer_text">Write 'stop' to stop receiving messages</field>
-        <field name="phone_field">partner_id.phone</field>
+        <field name="phone_field">partner_id.mobile</field>
         <field name="model_id" ref="sale.model_sale_order"/>
         <field name="body">Hello {{1}},
 

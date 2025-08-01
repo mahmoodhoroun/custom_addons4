@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <odoo noupdate="1">
-    <record id="whatsapp_template_payment_link" model="whatsapp.template" forcecreate="0">
+    <record id="whatsapp_template_payment_link" model="whatsapp.template">
         <field name="name">Payment Link</field>
         <field name="template_name">payment_link</field>
         <field name="lang_code">en</field>

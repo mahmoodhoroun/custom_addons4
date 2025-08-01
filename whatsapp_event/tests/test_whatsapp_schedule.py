@@ -140,17 +140,14 @@ class TestWhatsappSchedule(EventCase, WhatsAppCommon):
 
         test_event.date_begin = self.reference_now + timedelta(hours=1)
         self.assertGreater(self.reference_now, before_scheduler.scheduled_date, 'Scheduler scheduled_date should trigger it.')
-        for registration, state in zip_longest(test_event.registration_ids, ['draft', 'open', 'open', 'done'], fillvalue='cancel'):
+        for registration, state in zip_longest(test_event.registration_ids, ['draft', 'open'], fillvalue='cancel'):
             registration.state = state
         before_scheduler.mail_done = False
 
         with self.mock_datetime_and_now(self.reference_now), self.mockWhatsappGateway():
             before_scheduler.execute()
-        for registration in test_event.registration_ids.filtered(lambda reg: reg.state in ('open', 'done')):
-            with self.subTest(registration_state=registration.state):
-                self.assertWAMessageFromRecord(registration, status='outgoing')
-        self.assertEqual(len(self._new_wa_msg), 3, 'Whatsapp messages should not be send to draft and cancel registrations')
-        self.assertEqual(before_scheduler.filtered(lambda r: r.notification_type == 'whatsapp').mail_count_done, 3,
+        self.assertEqual(len(self._new_wa_msg), 2, 'Whatsapp messages were not created')
+        self.assertEqual(before_scheduler.filtered(lambda r: r.notification_type == 'whatsapp').mail_count_done, 2,
             'Wrong Whatsapp Sent Count! Probably msg sent to unconfirmed attendees were not included into the Sent Count')
 
     @mute_logger('odoo.addons.event.models.event_mail')

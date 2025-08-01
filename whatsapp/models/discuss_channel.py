@@ -105,7 +105,7 @@ class DiscussChannel(models.Model):
         return super()._get_notify_valid_parameters()
 
     def _notify_thread(self, message, msg_vals=False, **kwargs):
-        # WhatsApp msg must exist before notify to ensure it's included in notifications.
+        recipients_data = super()._notify_thread(message, msg_vals=msg_vals, **kwargs)
         if kwargs.get('whatsapp_inbound_msg_uid') and self.channel_type == 'whatsapp':
             self.env['whatsapp.message'].create({
                 'mail_message_id': message.id,
@@ -115,74 +115,26 @@ class DiscussChannel(models.Model):
                 'state': 'received',
                 'wa_account_id': self.wa_account_id.id,
             })
-        return super()._notify_thread(message, msg_vals=msg_vals, **kwargs)
+        return recipients_data
 
-    def message_post(self, *args, body='', attachment_ids=None, message_type='notification', parent_id=False, **kwargs):
-        valid_parent_id = False
-        if parent_id and self.whatsapp_number:
-            parent_wa_msg = self.env['mail.message'].browse(parent_id).wa_message_ids
-            if (
-                parent_wa_msg and len(parent_wa_msg) == 1 and
-                parent_wa_msg.message_type == "outbound" and  # replying to an outgoing wa
-                parent_wa_msg.mobile_number_formatted == self.whatsapp_number  # same recipient
-            ):
-                valid_parent_id = parent_id
-
-        if message_type != 'whatsapp_message' or self.channel_type != 'whatsapp':
-            message = super().message_post(
-                *args, body=body, attachment_ids=attachment_ids,
-                message_type=message_type, parent_id=parent_id, **kwargs
-            )
-            if valid_parent_id:
-                message.parent_id = valid_parent_id
-            return message
-
-        messages = None
-        if not kwargs.get('whatsapp_inbound_msg_uid') and attachment_ids and body:
-            audio_types = self.env['whatsapp.message']._SUPPORTED_ATTACHMENT_TYPE['audio']
-            attachment_records = self.env['ir.attachment'].browse(attachment_ids)
-            audio_attachments = attachment_records.filtered(lambda x: x.mimetype in audio_types)
-
-            if audio_attachments:
-                body_message = super().message_post(
-                    *args, message_type=message_type, body=body,
-                    attachment_ids=(attachment_records - audio_attachments).ids,
-                    parent_id=parent_id, **kwargs,
-                )
-                audio_message = super().message_post(
-                    *args, message_type=message_type, attachment_ids=audio_attachments.ids,
-                    parent_id=parent_id, **kwargs,
-                )
-                messages = body_message + audio_message
-        if not messages:
-            messages = super().message_post(
-                *args, body=body, message_type=message_type, attachment_ids=attachment_ids,
-                parent_id=parent_id, **kwargs,
-            )
-
-        whatsapp_message_vals = []
-        for new_msg in messages:
+    def message_post(self, *, message_type='notification', **kwargs):
+        new_msg = super().message_post(message_type=message_type, **kwargs)
+        if self.channel_type == 'whatsapp' and message_type == 'whatsapp_message':
+            if new_msg.author_id == self.whatsapp_partner_id:
+                self.env['bus.bus']._sendone(self, 'discuss.channel/whatsapp_channel_valid_until_changed', {
+                    'id': self.id,
+                    'whatsapp_channel_valid_until': self.whatsapp_channel_valid_until,
+                })
             if not new_msg.wa_message_ids:
-                whatsapp_message_vals.append({
+                whatsapp_message = self.env['whatsapp.message'].create({
                     'body': new_msg.body,
                     'mail_message_id': new_msg.id,
                     'message_type': 'outbound',
                     'mobile_number': f'+{self.whatsapp_number}',
                     'wa_account_id': self.wa_account_id.id,
                 })
-        if messages.author_id == self.whatsapp_partner_id:
-            self.env['bus.bus']._sendone(self, 'discuss.channel/whatsapp_channel_valid_until_changed', {
-                'id': self.id,
-                'whatsapp_channel_valid_until': self.whatsapp_channel_valid_until,
-            })
-        if whatsapp_message_vals:
-            self.env['whatsapp.message'].create(whatsapp_message_vals)._send_message()
-
-        if valid_parent_id:
-            messages.parent_id = valid_parent_id
-
-        # only return the non-audio message if there are two, as we don't expect to post two messages
-        return messages[0]
+                whatsapp_message._send()
+        return new_msg
 
     # ------------------------------------------------------------
     # CONTROLLERS
@@ -250,7 +202,7 @@ class DiscussChannel(models.Model):
                 'wa_account_id': wa_account_id.id,
                 'whatsapp_mail_message_id': related_message.id if related_message else None,
             })
-            partners_to_notify |= channel.whatsapp_partner_id
+            partners_to_notify += channel.whatsapp_partner_id
             if related_message:
                 # Add message in channel about the related document
                 info = _("Related %(model_name)s: ", model_name=self.env['ir.model']._get(related_message.model).display_name)
@@ -280,7 +232,7 @@ class DiscussChannel(models.Model):
                         subtype_xmlid='mail.mt_note',
                     )
             if partners_to_notify == channel.whatsapp_partner_id and wa_account_id.notify_user_ids.partner_id:
-                partners_to_notify |= wa_account_id.notify_user_ids.partner_id
+                partners_to_notify += wa_account_id.notify_user_ids.partner_id
             channel.channel_member_ids = [Command.clear()] + [Command.create({'partner_id': partner.id}) for partner in partners_to_notify]
             channel._broadcast(partners_to_notify.ids)
         return channel

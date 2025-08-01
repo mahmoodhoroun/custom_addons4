@@ -4,23 +4,32 @@
 # 
 # Translators:
 # Martin Trigaux, 2023
+# Sarah Park, 2023
 # Wil Odoo, 2024
 # Daye Jeong, 2024
-# Sarah Park, 2025
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 17.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-06-27 02:36+0000\n"
+"POT-Creation-Date: 2024-01-05 13:45+0000\n"
 "PO-Revision-Date: 2023-10-26 23:10+0000\n"
-"Last-Translator: Sarah Park, 2025\n"
+"Last-Translator: Daye Jeong, 2024\n"
 "Language-Team: Korean (https://app.transifex.com/odoo/teams/41243/ko/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Language: ko\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
+
+#. module: whatsapp
+#. odoo-python
+#: code:addons/whatsapp/models/whatsapp_template_variable.py:0
+#, python-format
+msgid ""
+"\"Template variable should be in format {{number}}. Cannot parse "
+"\"%(placeholder)s\""
+msgstr "\"서식 속성은 {{number}} 형식으로 되어 있어야 합니다. \"%(placeholder)s\" 구문 분석을 할 수 없습니다."
 
 #. module: whatsapp
 #. odoo-python
@@ -209,31 +218,6 @@ msgid "Arabic"
 msgstr "아랍어"
 
 #. module: whatsapp
-#: model:ir.model.fields.selection,name:whatsapp.selection__whatsapp_template__lang_code__ar_eg
-msgid "Arabic (EGY)"
-msgstr "Arabic (EGY)"
-
-#. module: whatsapp
-#: model:ir.model.fields.selection,name:whatsapp.selection__whatsapp_template__lang_code__ar_lb
-msgid "Arabic (LBN)"
-msgstr "Arabic (LBN)"
-
-#. module: whatsapp
-#: model:ir.model.fields.selection,name:whatsapp.selection__whatsapp_template__lang_code__ar_ma
-msgid "Arabic (MAR)"
-msgstr "Arabic (MAR)"
-
-#. module: whatsapp
-#: model:ir.model.fields.selection,name:whatsapp.selection__whatsapp_template__lang_code__ar_qa
-msgid "Arabic (QAT)"
-msgstr "Arabic (QAT)"
-
-#. module: whatsapp
-#: model:ir.model.fields.selection,name:whatsapp.selection__whatsapp_template__lang_code__ar_ae
-msgid "Arabic (UAE)"
-msgstr "Arabic (UAE)"
-
-#. module: whatsapp
 #: model_terms:ir.ui.view,arch_db:whatsapp.whatsapp_account_view_form
 #: model_terms:ir.ui.view,arch_db:whatsapp.whatsapp_account_view_search
 #: model_terms:ir.ui.view,arch_db:whatsapp.whatsapp_template_view_form
@@ -286,19 +270,9 @@ msgid "Base"
 msgstr "기준액"
 
 #. module: whatsapp
-#: model:ir.model.fields.selection,name:whatsapp.selection__whatsapp_template__lang_code__be_by
-msgid "Belarusian"
-msgstr "Belarusian"
-
-#. module: whatsapp
 #: model:ir.model.fields.selection,name:whatsapp.selection__whatsapp_template__lang_code__bn
 msgid "Bengali"
 msgstr "벵골어"
-
-#. module: whatsapp
-#: model:ir.model.fields.selection,name:whatsapp.selection__whatsapp_template__lang_code__bn_in
-msgid "Bengali (IND)"
-msgstr "Bengali (IND)"
 
 #. module: whatsapp
 #: model:ir.model.fields,field_description:whatsapp.field_whatsapp_message__body
@@ -537,11 +511,6 @@ msgid "Danish"
 msgstr "덴마크어"
 
 #. module: whatsapp
-#: model:ir.model.fields.selection,name:whatsapp.selection__whatsapp_template__lang_code__prs_af
-msgid "Dari"
-msgstr "Dari"
-
-#. module: whatsapp
 #: model:ir.model.fields.selection,name:whatsapp.selection__whatsapp_template__status__deleted
 msgid "Deleted"
 msgstr "삭제됨"
@@ -643,11 +612,6 @@ msgid "Dutch"
 msgstr "네덜란드어"
 
 #. module: whatsapp
-#: model:ir.model.fields.selection,name:whatsapp.selection__whatsapp_template__lang_code__nl_be
-msgid "Dutch (BEL)"
-msgstr "Dutch (BEL)"
-
-#. module: whatsapp
 #: model:ir.model.fields.selection,name:whatsapp.selection__whatsapp_template_button__url_type__dynamic
 msgid "Dynamic"
 msgstr "동적"
@@ -684,66 +648,6 @@ msgid "English"
 msgstr "영어"
 
 #. module: whatsapp
-#: model:ir.model.fields.selection,name:whatsapp.selection__whatsapp_template__lang_code__en_au
-msgid "English (AUS)"
-msgstr "English (AUS)"
-
-#. module: whatsapp
-#: model:ir.model.fields.selection,name:whatsapp.selection__whatsapp_template__lang_code__en_ca
-msgid "English (CAN)"
-msgstr "English (CAN)"
-
-#. module: whatsapp
-#: model:ir.model.fields.selection,name:whatsapp.selection__whatsapp_template__lang_code__en_gh
-msgid "English (GHA)"
-msgstr "English (GHA)"
-
-#. module: whatsapp
-#: model:ir.model.fields.selection,name:whatsapp.selection__whatsapp_template__lang_code__en_in
-msgid "English (IND)"
-msgstr "English (IND)"
-
-#. module: whatsapp
-#: model:ir.model.fields.selection,name:whatsapp.selection__whatsapp_template__lang_code__en_ie
-msgid "English (IRL)"
-msgstr "English (IRL)"
-
-#. module: whatsapp
-#: model:ir.model.fields.selection,name:whatsapp.selection__whatsapp_template__lang_code__en_jm
-msgid "English (JAM)"
-msgstr "English (JAM)"
-
-#. module: whatsapp
-#: model:ir.model.fields.selection,name:whatsapp.selection__whatsapp_template__lang_code__en_my
-msgid "English (MYS)"
-msgstr "English (MYS)"
-
-#. module: whatsapp
-#: model:ir.model.fields.selection,name:whatsapp.selection__whatsapp_template__lang_code__en_nz
-msgid "English (NZL)"
-msgstr "English (NZL)"
-
-#. module: whatsapp
-#: model:ir.model.fields.selection,name:whatsapp.selection__whatsapp_template__lang_code__en_qa
-msgid "English (QAT)"
-msgstr "English (QAT)"
-
-#. module: whatsapp
-#: model:ir.model.fields.selection,name:whatsapp.selection__whatsapp_template__lang_code__en_sg
-msgid "English (SGP)"
-msgstr "English (SGP)"
-
-#. module: whatsapp
-#: model:ir.model.fields.selection,name:whatsapp.selection__whatsapp_template__lang_code__en_ae
-msgid "English (UAE)"
-msgstr "English (UAE)"
-
-#. module: whatsapp
-#: model:ir.model.fields.selection,name:whatsapp.selection__whatsapp_template__lang_code__en_ug
-msgid "English (UGA)"
-msgstr "English (UGA)"
-
-#. module: whatsapp
 #: model:ir.model.fields.selection,name:whatsapp.selection__whatsapp_template__lang_code__en_gb
 msgid "English (UK)"
 msgstr "영어 (영국)"
@@ -752,11 +656,6 @@ msgstr "영어 (영국)"
 #: model:ir.model.fields.selection,name:whatsapp.selection__whatsapp_template__lang_code__en_us
 msgid "English (US)"
 msgstr "영어 (미국)"
-
-#. module: whatsapp
-#: model:ir.model.fields.selection,name:whatsapp.selection__whatsapp_template__lang_code__en_za
-msgid "English (ZAF)"
-msgstr "English (ZAF)"
 
 #. module: whatsapp
 #: model:ir.model.fields,field_description:whatsapp.field_whatsapp_template__error_msg
@@ -925,31 +824,6 @@ msgid "French"
 msgstr "불어"
 
 #. module: whatsapp
-#: model:ir.model.fields.selection,name:whatsapp.selection__whatsapp_template__lang_code__fr_be
-msgid "French (BEL)"
-msgstr "French (BEL)"
-
-#. module: whatsapp
-#: model:ir.model.fields.selection,name:whatsapp.selection__whatsapp_template__lang_code__fr_ca
-msgid "French (CAN)"
-msgstr "French (CAN)"
-
-#. module: whatsapp
-#: model:ir.model.fields.selection,name:whatsapp.selection__whatsapp_template__lang_code__fr_ch
-msgid "French (CHE)"
-msgstr "French (CHE)"
-
-#. module: whatsapp
-#: model:ir.model.fields.selection,name:whatsapp.selection__whatsapp_template__lang_code__fr_ci
-msgid "French (CIV)"
-msgstr "French (CIV)"
-
-#. module: whatsapp
-#: model:ir.model.fields.selection,name:whatsapp.selection__whatsapp_template__lang_code__fr_ma
-msgid "French (MAR)"
-msgstr "French (MAR)"
-
-#. module: whatsapp
 #: model:ir.model.fields.selection,name:whatsapp.selection__whatsapp_template__lang_code__ka
 msgid "Georgian"
 msgstr "조지아 (그루지아)어"
@@ -958,16 +832,6 @@ msgstr "조지아 (그루지아)어"
 #: model:ir.model.fields.selection,name:whatsapp.selection__whatsapp_template__lang_code__de
 msgid "German"
 msgstr "독일"
-
-#. module: whatsapp
-#: model:ir.model.fields.selection,name:whatsapp.selection__whatsapp_template__lang_code__de_at
-msgid "German (AUT)"
-msgstr "German (AUT)"
-
-#. module: whatsapp
-#: model:ir.model.fields.selection,name:whatsapp.selection__whatsapp_template__lang_code__de_ch
-msgid "German (CHE)"
-msgstr "German (CHE)"
 
 #. module: whatsapp
 #: model:ir.model.fields.selection,name:whatsapp.selection__whatsapp_template__lang_code__el
@@ -1041,6 +905,13 @@ msgstr "머리글 문서가 있어야 합니다."
 #, python-format
 msgid "Header document or report is required"
 msgstr "머리글 문서 또는 보고서가 있어야 합니다."
+
+#. module: whatsapp
+#. odoo-python
+#: code:addons/whatsapp/models/whatsapp_template.py:0
+#, python-format
+msgid "Header text can only contain a single {{variable}}."
+msgstr "문자 머리글에는 단일 {{variable}} 만 포함될 수 있습니다."
 
 #. module: whatsapp
 #: model:ir.model.fields.selection,name:whatsapp.selection__whatsapp_template__lang_code__he
@@ -1549,11 +1420,6 @@ msgid "Partner created by incoming WhatsApp message."
 msgstr "WhatsApp 수신 메시지를 통해 생성된 파트너입니다."
 
 #. module: whatsapp
-#: model:ir.model.fields.selection,name:whatsapp.selection__whatsapp_template__lang_code__ps_af
-msgid "Pashto"
-msgstr "Pashto"
-
-#. module: whatsapp
 #: model:ir.model.fields.selection,name:whatsapp.selection__whatsapp_template__status__paused
 msgid "Paused"
 msgstr "일시 중지"
@@ -1868,11 +1734,6 @@ msgid "Serbian"
 msgstr "세르비아어"
 
 #. module: whatsapp
-#: model:ir.model.fields.selection,name:whatsapp.selection__whatsapp_template__lang_code__si_lk
-msgid "Sinhala"
-msgstr "Sinhala"
-
-#. module: whatsapp
 #: model:ir.model.fields.selection,name:whatsapp.selection__whatsapp_template__lang_code__sk
 msgid "Slovak"
 msgstr "슬로바키아어"
@@ -1910,59 +1771,14 @@ msgid "Spanish (ARG)"
 msgstr "스페인어 (ARG)"
 
 #. module: whatsapp
-#: model:ir.model.fields.selection,name:whatsapp.selection__whatsapp_template__lang_code__es_cl
-msgid "Spanish (CHL)"
-msgstr "Spanish (CHL)"
-
-#. module: whatsapp
-#: model:ir.model.fields.selection,name:whatsapp.selection__whatsapp_template__lang_code__es_co
-msgid "Spanish (COL)"
-msgstr "Spanish (COL)"
-
-#. module: whatsapp
-#: model:ir.model.fields.selection,name:whatsapp.selection__whatsapp_template__lang_code__es_cr
-msgid "Spanish (CRI)"
-msgstr "Spanish (CRI)"
-
-#. module: whatsapp
-#: model:ir.model.fields.selection,name:whatsapp.selection__whatsapp_template__lang_code__es_do
-msgid "Spanish (DOM)"
-msgstr "Spanish (DOM)"
-
-#. module: whatsapp
-#: model:ir.model.fields.selection,name:whatsapp.selection__whatsapp_template__lang_code__es_ec
-msgid "Spanish (ECU)"
-msgstr "Spanish (ECU)"
-
-#. module: whatsapp
-#: model:ir.model.fields.selection,name:whatsapp.selection__whatsapp_template__lang_code__es_hn
-msgid "Spanish (HND)"
-msgstr "Spanish (HND)"
-
-#. module: whatsapp
 #: model:ir.model.fields.selection,name:whatsapp.selection__whatsapp_template__lang_code__es_mx
 msgid "Spanish (MEX)"
 msgstr "스페인어 (MEX)"
 
 #. module: whatsapp
-#: model:ir.model.fields.selection,name:whatsapp.selection__whatsapp_template__lang_code__es_pa
-msgid "Spanish (PAN)"
-msgstr "Spanish (PAN)"
-
-#. module: whatsapp
-#: model:ir.model.fields.selection,name:whatsapp.selection__whatsapp_template__lang_code__es_pe
-msgid "Spanish (PER)"
-msgstr "Spanish (PER)"
-
-#. module: whatsapp
 #: model:ir.model.fields.selection,name:whatsapp.selection__whatsapp_template__lang_code__es_es
 msgid "Spanish (SPA)"
 msgstr "스페인어 (SPA)"
-
-#. module: whatsapp
-#: model:ir.model.fields.selection,name:whatsapp.selection__whatsapp_template__lang_code__es_uy
-msgid "Spanish (URY)"
-msgstr "Spanish (URY)"
 
 #. module: whatsapp
 #: model:ir.model.fields,field_description:whatsapp.field_whatsapp_message__state
@@ -2096,13 +1912,6 @@ msgid "Template body"
 msgstr "서식 본문"
 
 #. module: whatsapp
-#. odoo-python
-#: code:addons/whatsapp/models/whatsapp_template.py:0
-#, python-format
-msgid "Template category is missing"
-msgstr "템플릿 카테고리가 없습니다."
-
-#. module: whatsapp
 #: model:ir.model.fields.selection,name:whatsapp.selection__whatsapp_message__failure_type__template
 msgid "Template quality rating too low"
 msgstr ""
@@ -2177,53 +1986,6 @@ msgid ""
 msgstr "머리말 글에는 변수가 없거나 {{1}}이 첫 번째 변수여야 합니다."
 
 #. module: whatsapp
-#: model:ir.model.fields.selection,name:whatsapp.selection__whatsapp_message__failure_type__outdated_channel
-msgid "The channel is no longer active"
-msgstr "이 채널은 더 이상 활성화 상태가 아닙니다."
-
-#. module: whatsapp
-#. odoo-javascript
-#: code:addons/whatsapp/static/src/core/common/message_patch.js:0
-#, python-format
-msgid "The message has been canceled."
-msgstr "메시지가 취소되었습니다."
-
-#. module: whatsapp
-#. odoo-javascript
-#: code:addons/whatsapp/static/src/core/common/message_patch.js:0
-#, python-format
-msgid "The message has been read by the recipient."
-msgstr "수신자가 이 메시지를 읽었습니다."
-
-#. module: whatsapp
-#. odoo-javascript
-#: code:addons/whatsapp/static/src/core/common/message_patch.js:0
-#, python-format
-msgid "The message has been sent."
-msgstr "메시지가 전송되었습니다."
-
-#. module: whatsapp
-#. odoo-javascript
-#: code:addons/whatsapp/static/src/core/common/message_patch.js:0
-#, python-format
-msgid "The message has been successfully delivered."
-msgstr "메시지가 성공적으로 전송되었습니다."
-
-#. module: whatsapp
-#. odoo-javascript
-#: code:addons/whatsapp/static/src/core/common/message_patch.js:0
-#, python-format
-msgid "The message has been successfully received."
-msgstr "메시지가 성공적으로 수신되었습니다."
-
-#. module: whatsapp
-#. odoo-javascript
-#: code:addons/whatsapp/static/src/core/common/message_patch.js:0
-#, python-format
-msgid "The message is being processed."
-msgstr "메시지가 처리 중입니다."
-
-#. module: whatsapp
 #. odoo-python
 #: code:addons/whatsapp/models/whatsapp_template_button.py:0
 #, python-format
@@ -2234,13 +1996,6 @@ msgstr "버튼의 자리표지자로는 {{1}} 항목만 사용할 수 있습니�
 #: model:ir.model.constraint,message:whatsapp.constraint_whatsapp_account_phone_uid_unique
 msgid "The same phone number ID already exists"
 msgstr "이미 존재하는 전화번호 아이디입니다."
-
-#. module: whatsapp
-#. odoo-javascript
-#: code:addons/whatsapp/static/src/core/common/message_patch.js:0
-#, python-format
-msgid "The status of this message is currently unknown."
-msgstr "이 메시지의 상태를 현재 알 수 없습니다."
 
 #. module: whatsapp
 #: model_terms:ir.actions.act_window,help:whatsapp.whatsapp_account_action
@@ -2265,13 +2020,6 @@ msgstr "다중 항목이 필요한 다른 서식이 여전히 있을 수도 있�
 #, python-format
 msgid "There should be at most 1 variable in the header of the template."
 msgstr "서식의 머리글 변수는 최대 1개만 있어야 합니다."
-
-#. module: whatsapp
-#. odoo-javascript
-#: code:addons/whatsapp/static/src/core/common/message_patch.js:0
-#, python-format
-msgid "There was an issue sending this message."
-msgstr "이 메시지를 전송하는 중에 문제가 발생했습니다."
 
 #. module: whatsapp
 #: model_terms:ir.ui.view,arch_db:whatsapp.whatsapp_account_view_form

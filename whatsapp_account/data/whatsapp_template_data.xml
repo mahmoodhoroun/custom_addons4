@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <odoo noupdate="1">
-    <record id="whatsapp_template_payment_receipt" model="whatsapp.template" forcecreate="0">
+    <record id="whatsapp_template_payment_receipt" model="whatsapp.template">
         <field name="name">Payment Receipt</field>
         <field name="template_name">payment_receipt</field>
         <field name="lang_code">en</field>
@@ -58,7 +58,7 @@ Best Regards
         ]" />
     </record>
 
-    <record id="whatsapp_template_invoice" model="whatsapp.template" forcecreate="0">
+    <record id="whatsapp_template_invoice" model="whatsapp.template">
         <field name="name">Invoice</field>
         <field name="template_name">invoice</field>
         <field name="lang_code">en</field>

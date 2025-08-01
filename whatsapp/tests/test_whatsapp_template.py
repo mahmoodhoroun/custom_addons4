@@ -1,5 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from odoo import Command
 from odoo import exceptions
 from odoo.addons.whatsapp.tests.common import WhatsAppCommon, MockIncomingWhatsApp
 from odoo.tests import Form, tagged, users
@@ -107,48 +108,6 @@ class WhatsAppTemplate(WhatsAppTemplateCommon):
                 name="test url fail", website_url="odoo.com",
             )
 
-    def test_template_create_existing_name_no_account(self):
-        """Check that account-linked templates do not prevent base data creation.
-        
-        Base data is linked to an existing account for convenience by default.
-        We should not use that default if it would result in a unique constraint error. 
-        """
-        common_template_name = 'test_template_create_existing_name_no_account'
-        first_template = self.env['whatsapp.template'].create({
-            'template_name': common_template_name,
-        })
-        self.assertTrue(first_template.wa_account_id, 'Expected a default account.')
-        self.assertEqual(
-            first_template.wa_account_id.id,
-            self.env['whatsapp.template']._get_default_wa_account_id(),
-            'Expected the default account.'
-        )
-        second_template = self.env['whatsapp.template'].create({
-            'template_name': common_template_name,
-        })
-        self.assertFalse(
-            second_template.wa_account_id,
-            'Expected fall-back on no account when name already exists for default account'
-        )
-        # Because NULL != NULL in postgres by default, we can have multiple templates with different names but no account
-        third_template = self.env['whatsapp.template'].create({
-            'template_name': common_template_name,
-        })
-        self.assertFalse(
-            third_template.wa_account_id,
-            'Expected fall-back on no account when name already exists for default account'
-        )
-
-        # check we can still select a specific account
-        new_account = self.whatsapp_account.copy({'phone_uid': 'test_template_create_existing_name_no_account'})
-        fourth_template = self.env['whatsapp.template'].create({
-            'template_name': common_template_name,
-            'wa_account_id': new_account.id,
-        })
-        self.assertEqual(
-            fourth_template.wa_account_id, new_account
-        )
-
     @users('user_wa_admin')
     def test_template_content_dynamic(self):
         """ Test body with multiple variables """
@@ -177,9 +136,9 @@ Welcome to {{3}} office''',
             'status': 'approved',
             'wa_account_id': self.whatsapp_account.id,
             'variable_ids': [
-                (0, 0, {'name': "{{1}}", 'line_type': "body", 'field_type': "user_name", 'demo_value': "Nishant"}),
-                (0, 0, {'name': "{{2}}", 'line_type': "body", 'field_type': "user_mobile", 'demo_value': "+91 12345 12345"}),
-                (0, 0, {'name': "{{3}}", 'line_type': "body", 'field_type': "free_text", 'demo_value': "Odoo In"}),
+                Command.create({'name': "{{1}}", 'line_type': "body", 'field_type': "user_name", 'demo_value': "Nishant"}),
+                Command.create({'name': "{{2}}", 'line_type': "body", 'field_type': "user_mobile", 'demo_value': "+91 12345 12345"}),
+                Command.create({'name': "{{3}}", 'line_type': "body", 'field_type': "free_text", 'demo_value': "Odoo In"}),
             ],
         })
         self.assertWATemplateVariables(
@@ -409,36 +368,6 @@ Welcome to {{3}} office''',
             ],
         )
 
-    @users('user_wa_admin')
-    def test_template_submit_with_10_body_variables(self):
-        """ Test template submit body with 10 variables """
-        template = self.env['whatsapp.template'].create({
-            'body': 'Hello I am {{1}} {{2}} {{3}} {{4}} {{5}} {{6}} {{7}} {{8}} {{9}} {{10}}',
-            'name': 'Test template submit with 10 variables',
-            'status': 'approved',
-            'variable_ids': [
-                (0, 0, {'name': "{{" + str(n) + "}}", 'line_type': "body", 'field_type': "free_text", 'demo_value': f"demo value {n}"})
-                for n in range(1, 11)
-            ],
-            'wa_account_id': self.whatsapp_account.id,
-        })
-        exp_json_data = {
-            "name": "test_template_submit_with_10_variables",
-            "language": "en",
-            "category": "MARKETING",
-            "components": [{
-                "type": "BODY",
-                "text": "Hello I am {{1}} {{2}} {{3}} {{4}} {{5}} {{6}} {{7}} {{8}} {{9}} {{10}}",
-                "example": {
-                    "body_text": [["demo value 1", "demo value 2", "demo value 3", "demo value 4",
-                                   "demo value 5", "demo value 6", "demo value 7", "demo value 8",
-                                   "demo value 9", "demo value 10"]]
-                }
-            }]
-        }
-        with self.mockWhatsappGateway(exp_json_data=exp_json_data):
-            template.invalidate_recordset()
-            template.button_submit_template()
 
 @tagged('wa_template', 'wip')
 class WhatsAppTemplateForm(WhatsAppTemplateCommon):
@@ -901,9 +830,9 @@ class WhatsAppTemplateSync(WhatsAppTemplateCommon):
             'header_text': 'Hello',
             'quality': 'green',
             'variable_ids': [
-                (5, 0),
-                (0, 0, {'name': "{{1}}", 'line_type': "body", 'field_type': "user_name", 'demo_value': "Jigar"}),
-                (0, 0, {'name': "{{2}}", 'line_type': "body", 'field_type': "user_mobile", 'demo_value': "+91 12345 12345"}),
+                Command.clear(),  # Remove existing variables
+                Command.create({'name': "{{1}}", 'line_type': "body", 'field_type': "user_name", 'demo_value': "Jigar"}),
+                Command.create({'name': "{{2}}", 'line_type': "body", 'field_type': "user_mobile", 'demo_value': "+91 12345 12345"}),
             ]})
         templates["test_dynamic_header_body_button"].write(
             {

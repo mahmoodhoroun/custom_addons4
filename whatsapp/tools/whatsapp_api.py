@@ -37,7 +37,7 @@ class WhatsAppApi:
         call_url = (DEFAULT_ENDPOINT + url) if not endpoint_include else url
 
         try:
-            res = requests.request(request_type, call_url, params=params, headers=headers, data=data, files=files, timeout=(10, 30))
+            res = requests.request(request_type, call_url, params=params, headers=headers, data=data, files=files, timeout=10)
         except requests.exceptions.RequestException:
             raise WhatsAppError(failure_type='network')
 

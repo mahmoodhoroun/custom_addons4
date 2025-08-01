@@ -31,7 +31,7 @@ msgstr "Rango de fecha"
 #. module: whatsapp_event
 #: model:ir.model,name:whatsapp_event.model_event_mail
 msgid "Event Automated Mailing"
-msgstr "Envío automatizado de correos para eventos"
+msgstr "Envío automático de correos de eventos"
 
 #. module: whatsapp_event
 #: model:ir.model,name:whatsapp_event.model_event_registration

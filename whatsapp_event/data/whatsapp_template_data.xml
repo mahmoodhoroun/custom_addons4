@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <odoo noupdate="1">
-    <record id="whatsapp_template_event_ticket" model="whatsapp.template" forcecreate="0">
+    <record id="whatsapp_template_event_ticket" model="whatsapp.template">
         <field name="name">Event Ticket</field>
         <field name="template_name">event_ticket</field>
         <field name="lang_code">en</field>
@@ -67,7 +67,7 @@ Thank you
         ]" />
     </record>
 
-    <record id="whatsapp_template_event_reminder" model="whatsapp.template" forcecreate="0">
+    <record id="whatsapp_template_event_reminder" model="whatsapp.template">
         <field name="name">Event Reminder</field>
         <field name="template_name">event_reminder</field>
         <field name="lang_code">en</field>

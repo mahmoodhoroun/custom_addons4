@@ -3,10 +3,8 @@
 
 from datetime import datetime
 
-from odoo import api, exceptions, models, _
+from odoo import exceptions, models, _
 from odoo.tools import format_datetime
-from odoo.addons.whatsapp.models.whatsapp_template import COMMON_WHATSAPP_PHONE_SAFE_FIELDS
-from odoo.addons.whatsapp.tools import phone_validation as wa_phone_validation
 
 
 class BaseModel(models.AbstractModel):
@@ -55,26 +53,6 @@ class BaseModel(models.AbstractModel):
                 for value in field_value
             )
         return ' '.join(str(value if value is not False and value is not None else '') for value in field_value)
-
-    @api.model
-    def _whatsapp_phone_format(self, fpath=None, number=None, raise_on_format_error=False):
-        """Format the number using the best possible country."""
-        self.ensure_one()
-        if fpath:
-            phone_record_path, phone_record_field = fpath.rsplit('.', 1) if '.' in fpath else ('', fpath)
-            phone_record = self.mapped(phone_record_path)
-            country_field = phone_record._phone_get_country_field()
-            phone_record_country = phone_record[country_field] if country_field else None
-        else:
-            phone_record_country = None
-
-        return wa_phone_validation.wa_phone_format(
-            self,
-            country=phone_record_country or self._phone_get_country().get(self.id),
-            number=(next(iter(self.mapped(fpath)), None) if fpath else number) or '',
-            force_format="WHATSAPP",
-            raise_exception=raise_on_format_error,
-        )
 
     def _whatsapp_get_portal_url(self):
         """ List is defined here else we need to create bridge modules. """
@@ -144,10 +122,6 @@ class BaseModel(models.AbstractModel):
             responsible_users = whatsapp_account.notify_user_ids
 
         return responsible_users
-
-    def _wa_get_safe_phone_fields(self):
-        """Return a list of fields that may be used as fallback when sending whatsapp messages."""
-        return list(COMMON_WHATSAPP_PHONE_SAFE_FIELDS)
 
     def _whatsapp_get_timezone(self):
         """To be override to get desired timezone of the model

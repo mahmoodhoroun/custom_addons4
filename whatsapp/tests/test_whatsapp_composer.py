@@ -32,7 +32,7 @@ class WhatsAppComposerCase(WhatsAppCommon):
         ])
 
         # templates (considered as approved)
-        cls.template_basic, cls.template_dynamic_cplx, cls.template_with_10_body_variables = cls.env['whatsapp.template'].create([
+        cls.template_basic, cls.template_dynamic_cplx = cls.env['whatsapp.template'].create([
             {
                 'body': 'Hello World',
                 'name': 'Test-basic',
@@ -51,15 +51,6 @@ Welcome to {{4}} office''',
                     (0, 0, {'name': "{{2}}", 'line_type': "body", 'field_type': "user_mobile", 'demo_value': "+91 12345 12345"}),
                     (0, 0, {'name': "{{3}}", 'line_type': "body", 'field_type': "field", 'demo_value': "sample country", 'field_name': 'country_id.name'}),
                     (0, 0, {'name': "{{4}}", 'line_type': "body", 'field_type': "free_text", 'demo_value': "Odoo In"}),
-                ],
-                'wa_account_id': cls.whatsapp_account.id,
-            }, {
-                'body': 'Hello I am {{1}} {{2}} {{3}} {{4}} {{5}} {{6}} {{7}} {{8}} {{9}} {{10}}',
-                'name': 'Test-template-with-10-body-variables',
-                'status': 'approved',
-                'variable_ids': [
-                    (0, 0, {'name': "{{" + str(n) + "}}", 'line_type': "body", 'field_type': "free_text", 'demo_value': f"demo value {n}"})
-                    for n in range(1, 11)
                 ],
                 'wa_account_id': cls.whatsapp_account.id,
             }
@@ -151,15 +142,6 @@ class WhatsAppComposerInternals(WhatsAppComposerCase, CronMixinCase):
                     "button_dynamic_url_1": 'https://runbot.odoo.com/runbot',
                     "button_dynamic_url_2": 'https://www.odoo.com/combat'
                 })
-
-    @users('user_wa_admin')
-    def test_composer_free_text_with_10_body_variables(self):
-        """ Test free_text with 10 body variables """
-        template = self.template_with_10_body_variables
-        template.invalidate_recordset()
-        composer_form = self._wa_composer_form(template, from_records=self.customers[0])
-        for idx in range(1, 11):
-            self.assertEqual(composer_form[f'free_text_{idx}'], f'demo value {idx}')
 
     @users('employee')
     def test_composer_number_on_template_change(self):
@@ -258,18 +240,14 @@ class WhatsAppComposerInternals(WhatsAppComposerCase, CronMixinCase):
                     else:
                         composer._send_whatsapp_template(force_send_by_cron=force_cron)
 
-                # in batch mode: two messages ready to be sent + one failed
+                # in batch mode: three messages ready to be sent if sent with force_cron parameter, else two messages
                 if exp_batch:
-                    self.assertEqual(len(self._new_wa_msg), 3)
+                    self.assertEqual(len(self._new_wa_msg), 3 if force_cron else 2)
                     for exp_contacted in self.customers:
                         self.assertWAMessageFromRecord(
                             exp_contacted,
                             status="outgoing",
                         )
-                    self.assertWAMessageFromRecord(
-                        invalid_customer,
-                        status="error",
-                    )
                 if exp_cron_trigger:
                     self.assertEqual(len(captured_triggers.records), 1)
                     self.assertEqual(
@@ -351,10 +329,7 @@ class WhatsAppComposerInternals(WhatsAppComposerCase, CronMixinCase):
                     composer.action_send_whatsapp_template()
                 self.assertWAMessage(
                     mail_message_values={
-                        'author_id': self.user_employee.partner_id,
-                        'create_uid': self.user_employee,
                         'body': f'<p>Please evaluate {expected_value}.</p>',
-                        'partner_ids': test_partner,
                     }
                 )
 
@@ -413,14 +388,6 @@ class WhatsAppComposerPreview(WhatsAppComposerCase):
         ]:
             self.assertIn(expected_str, composer.preview_whatsapp)
 
-    @users('user_wa_admin')
-    def test_composer_preview_with_10_body_variables(self):
-        """ Test preview feature from composer with 10 body variables """
-        template = self.template_with_10_body_variables
-        template.invalidate_recordset()
-        composer = self._instanciate_wa_composer_from_records(template, from_records=self.customers[0])
-        exp_body = 'Hello I am %s' % ' '.join(f'demo value {idx}' for idx in range(1, 11))
-        self.assertIn(exp_body, composer.preview_whatsapp)
 
 @tagged('wa_composer')
 class WhatsAppComposerUsage(WhatsAppComposerCase):

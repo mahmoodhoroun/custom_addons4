@@ -7,7 +7,7 @@
         <field name="res_model">whatsapp.template</field>
     </record>
 
-    <record id="whatsapp_template_pos" model="whatsapp.template" forcecreate="0">
+    <record id="whatsapp_template_pos" model="whatsapp.template">
         <field name="name">POS Receipt</field>
         <field name="template_name">pos_receipt</field>
         <field name="lang_code">en</field>

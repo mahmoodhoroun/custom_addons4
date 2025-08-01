@@ -61,8 +61,8 @@ class WhatsAppTemplate(models.Model):
     active = fields.Boolean(default=True)
 
     wa_account_id = fields.Many2one(
-        comodel_name='whatsapp.account', string="Account", compute="_compute_wa_account_id",
-        ondelete="cascade", precompute=True, readonly=False, store=True)
+        comodel_name='whatsapp.account', string="Account", default=_get_default_wa_account_id,
+        ondelete="cascade")
     wa_template_uid = fields.Char(string="WhatsApp Template ID", copy=False)
     error_msg = fields.Char(string="Error Message")
 
@@ -159,7 +159,9 @@ class WhatsAppTemplate(models.Model):
                     raise AccessError(
                         _("You can not select field of %(model)s.", model=model_description)
                     )
-                safe_fields = set(model._wa_get_safe_phone_fields())
+                safe_fields = set(COMMON_WHATSAPP_PHONE_SAFE_FIELDS)
+                if hasattr(model, '_wa_get_safe_phone_fields'):
+                    safe_fields |= set(model._wa_get_safe_phone_fields())
                 if tmpl.phone_field not in safe_fields:
                     raise AccessError(
                         _("You are not allowed to use %(field)s in phone field, contact your administrator to configure it.",
@@ -314,18 +316,6 @@ class WhatsAppTemplate(models.Model):
             #     to_delete.unlink()
             tmpl.variable_ids = [(3, to_remove.id) for to_remove in to_delete] + [(0, 0, vals) for vals in to_create_values]
 
-    def _compute_wa_account_id(self):
-        """Set default account unless the template name is already used."""
-        default_account_id = self._get_default_wa_account_id()
-        account_less_templates = self.filtered(lambda template: not template.wa_account_id)
-        existing_template_names = set(self.env['whatsapp.template'].search([
-            ('template_name', 'in', account_less_templates.mapped('template_name')),
-            ('wa_account_id', '=', default_account_id),
-        ]).mapped('template_name'))
-        for template in account_less_templates:
-            if template.template_name not in existing_template_names:
-                template.wa_account_id = default_account_id
-
     @api.depends('model_id')
     def _compute_has_action(self):
         for tmpl in self:
@@ -456,7 +446,7 @@ class WhatsAppTemplate(models.Model):
         if not self.body:
             return None
         body_component = {'type': 'BODY', 'text': self.body}
-        body_params = self.variable_ids.filtered(lambda line: line.line_type == 'body').sorted(key=lambda var: var._extract_variable_index())
+        body_params = self.variable_ids.filtered(lambda line: line.line_type == 'body')
         if body_params:
             body_component['example'] = {'body_text': [body_params.mapped('demo_value')]}
         return body_component

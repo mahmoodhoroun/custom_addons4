@@ -22,7 +22,7 @@ class MockOutgoingWhatsApp(common.BaseCase):
     when contacting it. """
 
     @contextmanager
-    def mockWhatsappGateway(self, exp_json_data=None):
+    def mockWhatsappGateway(self):
         self._init_wa_mock()
         wa_msg_origin = WhatsAppMessage.create
         partner_create_origin = Partner.create
@@ -40,20 +40,14 @@ class MockOutgoingWhatsApp(common.BaseCase):
                     return tmpl
             return {}
 
-        def _get_whatsapp_document(document_id):
-            return self._wa_document_store.get(document_id, "abcd")
-
         def _send_whatsapp(number, *, send_vals, **kwargs):
             if send_vals:
-                msg_uid = f'test_wa_{time.time() + len(self._wa_msg_sent):.9f}'
+                msg_uid = f'test_wa_{time.time():.9f}'
                 self._wa_msg_sent.append(msg_uid)
-                self._wa_msg_sent_vals.append(send_vals)
                 return msg_uid
             raise WhatsAppError("Please make sure to define a template before proceeding.")
 
         def _submit_template_new(json_data):
-            if exp_json_data:
-                self.assertDictEqual(json.loads(json_data), exp_json_data)
             if json_data:
                 return {
                     "id": f"{time.time():.15f}",
@@ -69,7 +63,6 @@ class MockOutgoingWhatsApp(common.BaseCase):
 
         def _upload_whatsapp_document(attachment):
             if attachment:
-                self._wa_uploaded_document_count += 1
                 return {
                     "messaging_product": "whatsapp",
                     "contacts": [{
@@ -77,7 +70,7 @@ class MockOutgoingWhatsApp(common.BaseCase):
                             "wa_id": "1234567890",
                         }],
                     "messages": [{
-                        "id": str(self._wa_uploaded_document_count),
+                        "id": "qwertyuiop0987654321",
                     }]
                 }
             raise WhatsAppError("Please ensure you are using the correct file type and try again.")
@@ -105,7 +98,6 @@ class MockOutgoingWhatsApp(common.BaseCase):
             with patch.object(Partner, 'create', autospec=True, wraps=Partner, side_effect=_res_partner_create), \
                  patch.object(WhatsAppApi, '_get_all_template', side_effect=_get_all_template), \
                  patch.object(WhatsAppApi, '_get_template_data', side_effect=_get_template_data), \
-                 patch.object(WhatsAppApi, '_get_whatsapp_document', side_effect=_get_whatsapp_document), \
                  patch.object(WhatsAppApi, '_upload_demo_document', side_effect=_upload_demo_document), \
                  patch.object(WhatsAppApi, '_upload_whatsapp_document', side_effect=_upload_whatsapp_document), \
                  patch.object(WhatsAppApi, '_send_whatsapp', side_effect=_send_whatsapp), \
@@ -120,27 +112,6 @@ class MockOutgoingWhatsApp(common.BaseCase):
         self._new_partners = self.env['res.partner'].sudo()
         self._new_wa_msg = self.env['whatsapp.message'].sudo()
         self._wa_msg_sent = []
-        self._wa_document_store = {}
-        self._wa_uploaded_document_count = 0
-        self._wa_msg_sent_vals = []
-
-    @contextmanager
-    def patchWhatsappCronTrigger(self):
-        """Call the cron code immediately in the current thread when whatsapp-related crons are triggered.
-
-        Useful when you care about the result of the actual sending step of a batch of messages.
-        """
-        IrCron = self.registry['ir.cron']
-        trigger_orig = IrCron._trigger
-
-        def mock_trigger(cron, *args, **kwargs):
-            if cron == self.env.ref('whatsapp.ir_cron_send_whatsapp_queue'):
-                cron.sudo().method_direct_trigger(*args, **kwargs)
-            else:
-                return trigger_orig(*args, **kwargs)
-
-        with patch.object(IrCron, '_trigger', autospec=True, side_effect=mock_trigger):
-            yield
 
 
 class MockIncomingWhatsApp(common.HttpCase):
@@ -220,53 +191,22 @@ class MockIncomingWhatsApp(common.HttpCase):
             }
         )
 
-    def _receive_whatsapp_message(
-        self, account, body, sender_phone_number, message_type="text",
-        additional_message_values=None, content_values=None, sender_name='',
-    ):
-        body = body or ""
-        additional_message_values = additional_message_values or {}
-        content_values = content_values or {}
-        message_vals = {
-            "id": f"test_wa_{time.time():.9f}",
-            "from": sender_phone_number,
-            "timestamp": f"{time.time():.0f}",
-            "type": message_type,
-        }
-        match message_type:
-            case "text":
-                message_vals.update(text={"body": body} | content_values)
-            case "audio":
-                message_vals.update(audio={
-                    "mime_type": "audio/ogg; codecs=opus",
-                    "sha256": "cNkcfuFnXxg3WcBOc4A+nw8SBV0+2LyWkZ+0ZbeKPG0=",
-                    "id": f"{time.time():.0f}",
-                    "voice": True,
-                } | content_values)
-            case "image":
-                message_vals.update(image={
-                    "caption": body,
-                    "mime_type": "image/jpeg",
-                    "sha256": "GToZ5lsWaujMRC7kjueZsKxnNVXo/29NbHJmO6OZa+M=",
-                    "id": f"{time.time():.0f}",
-                } | content_values)
-            case _:
-                raise Exception(f"Unsupported whatsapp message type {message_type}")
-        message_vals.update(additional_message_values)
+    def _receive_whatsapp_message(self, account, body, sender_phone_number, additional_message_values=None):
         message_data = json.dumps({
-            "object": "whatsapp_business_account",
             "entry": [{
                 "id": account.account_uid,
                 "changes": [{
                     "field": "messages",
                     "value": {
-                        "messaging_product": "whatsapp",
-                        "metadata": {"phone_number_id": account.phone_uid, "display_phone_number": "12345678912"},
-                        "contacts": [{
-                            "profile": {"name": sender_name},
-                            "wa_id": f"{time.time() % 9 // 1:.0f}{sender_phone_number[1:]}",  # not necessarily the actual phone number
-                        }],
-                        "messages": [message_vals],
+                        "metadata": {"phone_number_id": account.phone_uid},
+                        "messages": [
+                            dict({
+                                "id": f"test_wa_{time.time():.9f}",
+                                "from": sender_phone_number,
+                                "type": "text",
+                                "text": {"body": body}
+                            }, **(additional_message_values or {}))
+                        ],
                     }
                 }]
             }]
@@ -706,19 +646,6 @@ class WhatsAppCommon(MailCommon, WhatsAppCase):
                 'token': 'token_2',
             }
         ])
-        cls.simple_whatsapp_template = cls.env['whatsapp.template'].create({
-            'body': 'Howdy Partner',
-            'model_id': cls.env['ir.model']._get_id('res.partner'),
-            'name': '{{1}}',
-            'quality': 'green',
-            'status': 'approved',
-            'template_name': 'simple_whatsapp_template',
-            'variable_ids': [
-                (0, 0, {'name': '{{1}}', 'line_type': 'body', 'field_type': 'free_text', 'demo_value': 'Simple Whatsapp Template'}),
-            ],
-            'wa_account_id': cls.whatsapp_account.id,
-            'wa_template_uid': 'simple_whatsapp_template',
-        })
         # Test customer (In)
         cls.whatsapp_customer = cls.env['res.partner'].create({
             'country_id': cls.env.ref('base.in').id,
@@ -738,8 +665,6 @@ class WhatsAppCommon(MailCommon, WhatsAppCase):
                       "AAAAAQAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAAABidWR0"
                       "YQAAAFptZXRhAAAAAAAAACFoZGxyAAAAAAAAAABtZGlyYXBwbAAAAAAAAAAAAAAAAC1pbHN0AAAA"
                       "Jal0b28AAAAdZGF0YQAAAAEAAAAATGF2ZjU3LjQxLjEwMA==")
-        audio_data = '/+MYxAAAAANIAAAAAExBTUUzLjk4LjIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
-
         documents = cls.env['ir.attachment'].with_user(cls.user_employee).create([
             {'name': 'Document.pdf', 'datas': pdf_data},
             {'name': 'Image.jpg', 'datas': image_data},
@@ -752,9 +677,8 @@ class WhatsAppCommon(MailCommon, WhatsAppCase):
             {'name': 'Image.jpg', 'datas': image_data},
             {'name': 'Video.mpg', 'datas': video_data},
             {'name': 'Payload.wasm', 'datas': "AGFzbQEAAAA=", 'mimetype': 'application/octet-stream'},
-            {'name': 'Audio.mp3', 'datas': audio_data},
         ])
-        cls.document_attachment_wa_admin, cls.image_attachment_wa_admin, cls.video_attachment_wa_admin, cls.invalid_attachment_wa_admin, cls.audio_attachment_wa_admin = documents_wa_admin
+        cls.document_attachment_wa_admin, cls.image_attachment_wa_admin, cls.video_attachment_wa_admin, cls.invalid_attachment_wa_admin = documents_wa_admin
 
     @classmethod
     def _setup_share_users(cls):

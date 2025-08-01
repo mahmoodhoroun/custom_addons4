@@ -34,8 +34,9 @@ def wa_phone_format(record, fname=False, number=False, country=None,
 
     # fetch country info only if record is a singleton recordset allowing to
     # effectively try to find a country
-    if not country and record:
-        country = record._phone_get_country().get(record.id)
+    if not country and record and 'country_id' in record:
+        record.ensure_one()
+        country = record.country_id
     if not country:
         country = record.env.company.country_id
 
@@ -61,11 +62,5 @@ def wa_phone_format(record, fname=False, number=False, country=None,
             if raise_exception:
                 raise
             return False
-        zeros = ''
-        # Not only for italian numbers, but for all numbers with leading zeros
-        if parsed.italian_leading_zero:
-            zeros = '0'
-            if parsed.number_of_leading_zeros:
-                zeros = '0' * parsed.number_of_leading_zeros
-        return f'{parsed.country_code}' + zeros + f'{parsed.national_number}'
+        return f'{parsed.country_code}{parsed.national_number}'
     return formatted

@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <odoo noupdate="1">
-    <record id="whatsapp_template_sale_order_ship" model="whatsapp.template" forcecreate="0">
+    <record id="whatsapp_template_sale_order_ship" model="whatsapp.template">
         <field name="name">Sale Order Ship</field>
         <field name="template_name">sale_order_ship</field>
         <field name="lang_code">en</field>

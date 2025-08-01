@@ -33,7 +33,7 @@ msgstr "Envio de Email Automático do Evento"
 #. module: whatsapp_event
 #: model:ir.model,name:whatsapp_event.model_event_registration
 msgid "Event Registration"
-msgstr "Inscrição no Evento"
+msgstr "Registos no Evento"
 
 #. module: whatsapp_event
 #: model:ir.model,name:whatsapp_event.model_event_type_mail
