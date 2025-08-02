@@ -11,6 +11,12 @@ class StockPicking(models.Model):
                                      help="Indicates if the picking has been expedited", compute='_compute_expedie')
     ramasse = fields.Boolean(string='Ramassé', default=False, 
                                      help="Indicates if the picking has been ramassed", compute='_compute_ramasse')
+    customer_phone = fields.Char(string='Customer Phone', compute='_compute_customer_phone')
+    
+    def _compute_customer_phone(self):
+        for picking in self:
+            picking.customer_phone = picking.partner_id.phone
+    
     def _compute_expedie(self):
         for picking in self:
             if picking.delivery_id or picking.shipsy_reference_number:

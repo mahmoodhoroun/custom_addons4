@@ -10,6 +10,12 @@ from datetime import timedelta
 
 class AccountMove(models.Model):
     _inherit = 'account.move'
+
+    customer_phone = fields.Char(string='Customer Phone', compute='_compute_customer_phone')
+    
+    def _compute_customer_phone(self):
+        for move in self:
+            move.customer_phone = move.partner_id.phone
     
     def _upload_to_google_drive(self, file_data, filename, backup_config=None):
         """Upload a file to Google Drive using the configured settings from auto_database_backup"""

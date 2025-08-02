@@ -137,7 +137,7 @@ class ResPartner(models.Model):
             )
             if not address_data:
                 continue
-            child_data.append(address_data)
+            # child_data.append(address_data)
         return child_data
 
 
