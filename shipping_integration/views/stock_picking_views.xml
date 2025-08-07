@@ -68,7 +68,7 @@
         <field name="binding_model_id" ref="stock.model_stock_picking"/>
         <field name="binding_view_types">list</field>
         <field name="state">code</field>
-        <field name="code">action = records.call_shipping_api()</field>
+        <field name="code">action = records.call_shipping_api_multiple()</field>
     </record>
     <record id="action_generate_delivery_pdf" model="ir.actions.server">
         <field name="name">Etiquettes Cathedis</field>

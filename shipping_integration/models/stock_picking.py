@@ -97,6 +97,33 @@ class StockPicking(models.Model):
                         rec.delivery_id = str(delivery_id)  # Store the delivery ID in the field
                         _logger.info("API call successful. Delivery ID: %s", delivery_id)
                         rec.new_state = 'delivered'
+                        if not self.env.context.get('skip_notification'):
+                            return {
+                                'type': 'ir.actions.client',
+                                'tag': 'display_notification',
+                                'params': {
+                                    'title': _('Success'),
+                                    'message': _('Delivery successfully sent to Cathedis with reference: %s') % delivery_id,
+                                    'sticky': False,
+                                    'type': 'success',
+                                    'next': {
+                                        'type': 'ir.actions.act_window',
+                                        'res_model': 'stock.picking',
+                                        'res_id': self.id,
+                                        'view_mode': 'form',
+                                        'target': 'current',
+                                        'views': [(False, 'form')],
+                                    }
+                                }
+                            }
+                        else:
+                            # Return a simple success result for batch processing
+                            return {
+                                'params': {
+                                    'type': 'success',
+                                    'reference_number': delivery_id
+                                }
+                            }
                     else:
                         _logger.warning("Delivery ID not found in the response.")
                         _logger.info("*****************************")
@@ -106,6 +133,47 @@ class StockPicking(models.Model):
                 else:
                     _logger.error("API call failed with status %s: %s", response.status_code, response.text)
                     raise ValueError("Delivery ID not found in the response.%s: %s", response.status_code, response.text)
+
+    def call_shipping_api_multiple(self):
+        success_count = 0
+        error_count = 0
+        error_messages = []
+        for picking in self:
+            try:
+                # Skip if already has a reference number
+                if picking.delivery_id:
+                    continue
+                
+                # Call the single send method without raising exceptions
+                result = picking.with_context(skip_notification=True).call_shipping_api()
+                if result and result.get('params', {}).get('type') == 'success':
+                    success_count += 1
+                else:
+                    error_count += 1
+                    
+            except Exception as e:
+                error_count += 1
+                error_messages.append(f"{picking.name}: {str(e)}")
+        
+        # Show summary notification
+        message = f"Successfully sent {success_count} deliveries to Cathedis."
+        if error_count:
+            message += f"\nFailed to send {error_count} deliveries."
+            if error_messages:
+                message += f"\nErrors: {', '.join(error_messages[:5])}"
+                if len(error_messages) > 5:
+                    message += f" and {len(error_messages) - 5} more."
+        
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('Cathedis Delivery Creation'),
+                'message': message,
+                'sticky': True,
+                'type': 'info',
+            }
+        }
 
     def action_generate_delivery_pdf(self):
         ids = [int(rec.delivery_id) for rec in self]
