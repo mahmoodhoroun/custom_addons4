@@ -17,6 +17,7 @@
         'wizards/sale_order_cancel_confirm_view.xml',
         'wizards/invoice_confirm_wizard_view.xml',
         'views/account_move_view.xml',
+        'views/res_users_views.xml',
         'reports/picking_labels.xml',
     ],
     'installable': True,

@@ -378,6 +378,22 @@
             </xpath>
 
 
+            <xpath expr="//div[hasclass('page')]/div[last()]" position="after">
+                <div class="mb-3 mt-5 text-start">
+                    <t t-if="user and user.stamp_image">
+                        <img t-att-src="image_data_uri(user.stamp_image)" alt="User Stamp" style="max-width: 200px;" />
+                    </t>
+                    <br/>
+                    <t t-if="user and user.signature_image">
+                        <img t-att-src="image_data_uri(user.signature_image)" alt="User Signature" style="max-width: 200px;" />
+                    </t>
+                    <!-- <t t-else="">
+                        <img t-att-src="'/custom_features/static/src/img/Signature.png'" alt="Default Signature" style="max-width: 200px;" />
+                    </t> -->
+                </div>
+            </xpath>
+
+
         </template>
 
 </odoo>
