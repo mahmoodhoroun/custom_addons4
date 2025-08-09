@@ -49,12 +49,12 @@
         <field name="model">stock.picking</field>
         <field name="inherit_id" ref="stock.vpicktree"/>
         <field name="arch" type="xml">
-            <!-- <xpath expr="//header" position="inside">
-                <button name="call_shipping_api" type="object" string="Livraison Cathedis" class="btn-primary" />
+            <xpath expr="//header" position="inside">
+                <!-- <button name="call_shipping_api" type="object" string="Livraison Cathedis" class="btn-primary" /> -->
                 <button name="action_generate_delivery_pdf" type="object" string="Etiquettes Cathedis" class="btn-primary" />
-                <button name="action_refresh_pickup_request" type="object" string="Ramassage Cathedis" class="btn-primary" />
+                <!-- <button name="action_refresh_pickup_request" type="object" string="Ramassage Cathedis" class="btn-primary" /> -->
 
-            </xpath> -->
+            </xpath>
             <xpath expr="//field[@name='state']" position="after">
                 <field name="new_state" optional="show" widget="badge" string="Statut Cathedis"/>
                 <field name="print" optional="show" widget="boolean"/>

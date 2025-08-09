@@ -7,7 +7,7 @@ class BulkConfirmWizard(models.TransientModel):
 
     invoice_date = fields.Date(string="Invoice Date")
     payment_term_id = fields.Many2one('account.payment.term', string="Payment Term")
-    
+    payment_reference = fields.Char(string="Payment Reference")
     @api.model
     def default_get(self, fields_list):
         res = super().default_get(fields_list)
@@ -31,5 +31,6 @@ class BulkConfirmWizard(models.TransientModel):
             invoice.write({
                 'invoice_date': self.invoice_date,
                 'invoice_payment_term_id': self.payment_term_id.id,
+                'payment_reference': self.payment_reference
             })
             invoice.action_post()

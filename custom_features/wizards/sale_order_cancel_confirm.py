@@ -28,5 +28,9 @@ class SaleOrderCancelConfirm(models.TransientModel):
         self.ensure_one()
         # Update the order's reason before cancelling
         self.order_id.cancel_reason = self.reason
+        for pack in self.order_id.picking_ids:
+            if pack.shipsy_reference_number and pack.shipsy_is_cancelled == False:
+                pack.action_cancel_shipsy_delivery()
+            
         # Call the super method to perform the actual cancellation
         return self.order_id.with_context(bypass_cancel_wizard=True).action_cancel()
