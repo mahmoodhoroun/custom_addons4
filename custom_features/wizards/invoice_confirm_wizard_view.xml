@@ -8,6 +8,7 @@
                 <group>
                     <field name="invoice_date"/>
                     <field name="payment_term_id"/>
+                    <field name="payment_reference"/>
                 </group>
                 <footer>
                     <button string="Confirm All" type="object" name="confirm_all" class="btn-primary"/>
