@@ -17,7 +17,7 @@ class AccountMove(models.Model):
         for move in self:
             move.customer_phone = move.partner_id.phone
     
-    def _upload_to_google_drive(self, file_data, filename, backup_config=None):
+    def _upload_to_google_drive(self, file_data, filename, backup_config=None, mime_type='application/pdf'):
         """Upload a file to Google Drive using the configured settings from auto_database_backup"""
         # If backup_config is not provided, find the first active Google Drive backup configuration
         if not backup_config:
@@ -57,7 +57,7 @@ class AccountMove(models.Model):
         # Create multipart request
         files = {
             'data': ('metadata', json.dumps(para), 'application/json; charset=UTF-8'),
-            'file': (filename, file_data, 'application/zip')
+            'file': (filename, file_data, mime_type)
         }
         
         try:
@@ -78,39 +78,10 @@ class AccountMove(models.Model):
         except Exception as e:
             return {'error': f'Unexpected error: {str(e)}'}
 
-    def action_print_invoices_zip(self):
-        """Print selected invoices and combine them into a ZIP file for download and upload to Google Drive"""
+    def action_print_invoices_pdf(self):
+        """Print selected invoices as individual PDF files and upload them to Google Drive"""
         if not self:
             raise ValidationError(_('Please select at least one invoice to print.'))
-            
-        # Create a ZIP file in memory
-        zip_buffer = io.BytesIO()
-        with zipfile.ZipFile(zip_buffer, 'w') as zip_file:
-            for invoice in self:
-                # Generate PDF report for each invoice
-                pdf_content, _ = self.env['ir.actions.report']._render_qweb_pdf(
-                    'account.account_invoices', invoice.ids
-                )
-                
-                # Add the PDF to the ZIP file with a meaningful filename
-                filename = f"Invoice_{invoice.name.replace('/', '_')}.pdf"
-                zip_file.writestr(filename, pdf_content)
-        
-        # Get the ZIP file data
-        zip_buffer.seek(0)
-        zip_data_binary = zip_buffer.read()
-        zip_data = base64.b64encode(zip_data_binary)
-        
-        # Store a copy of the raw data for Google Drive upload
-        raw_zip_data = zip_data_binary
-        
-        # Create attachment for download
-        attachment = self.env['ir.attachment'].create({
-            'name': 'Invoices.zip',
-            'type': 'binary',
-            'datas': zip_data,
-            'mimetype': 'application/zip',
-        })
         
         # Check if auto_database_backup module is installed
         if self.env['ir.module.module'].sudo().search([('name', '=', 'auto_database_backup'), ('state', '=', 'installed')]):
@@ -125,60 +96,95 @@ class AccountMove(models.Model):
                 
                 if not backup_config:
                     raise ValidationError("No valid Google Drive configuration found")
-                    
-                # Create a filename with timestamp
-                timestamp = fields.Datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-                filename = f"Invoices_{timestamp}.zip"
                 
-                # Upload to Google Drive - use the raw binary data, not base64 encoded
-                drive_response = self._upload_to_google_drive(raw_zip_data, filename, backup_config)
+                uploaded_files = []
+                failed_uploads = []
                 
-                # Check if there was an error
-                if drive_response and 'error' in drive_response:
-                    message = f"Failed to upload to Google Drive: {drive_response['error']}"
-                    self.env['bus.bus']._sendone(
-                        self.env.user.partner_id, 
-                        'notification', 
-                        {
-                            'type': 'warning',
-                            'title': "Google Drive Upload",
-                            'message': message,
-                            'sticky': True,
-                        }
-                    )
+                # Upload each invoice PDF individually
+                for invoice in self:
+                    try:
+                        # Generate PDF report for each invoice
+                        pdf_content, _ = self.env['ir.actions.report']._render_qweb_pdf(
+                            'account.account_invoices', invoice.ids
+                        )
+                        
+                        # Create filename with timestamp
+                        timestamp = fields.Datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+                        filename = f"Invoice_{invoice.name.replace('/', '_')}_{timestamp}.pdf"
+                        
+                        # Upload to Google Drive
+                        drive_response = self._upload_to_google_drive(pdf_content, filename, backup_config, 'application/pdf')
+                        
+                        # Check if there was an error
+                        if drive_response and 'error' in drive_response:
+                            failed_uploads.append(f"{invoice.name}: {drive_response['error']}")
+                        else:
+                            uploaded_files.append(invoice.name)
+                            
+                    except Exception as e:
+                        failed_uploads.append(f"{invoice.name}: {str(e)}")
+                
+                # Show summary notification
+                if uploaded_files and not failed_uploads:
+                    message = f"Successfully uploaded {len(uploaded_files)} invoice(s) to Google Drive"
+                    notification_type = 'success'
+                    sticky = False
+                elif uploaded_files and failed_uploads:
+                    message = f"Uploaded {len(uploaded_files)} invoice(s) successfully. Failed: {len(failed_uploads)}"
+                    notification_type = 'warning'
+                    sticky = True
                 else:
-                    # Show success message
-                    message = "Invoices successfully uploaded to Google Drive"
-                    self.env['bus.bus']._sendone(
-                        self.env.user.partner_id, 
-                        'notification', 
-                        {
-                            'type': 'success',
-                            'title': "Google Drive Upload",
-                            'message': message,
-                            'sticky': False,
-                        }
-                    )
-            except Exception as e:
-                # Log the error but don't stop the download process
-                message = f"Failed to upload to Google Drive: {str(e)}"
+                    message = f"Failed to upload all {len(failed_uploads)} invoice(s) to Google Drive"
+                    notification_type = 'danger'
+                    sticky = True
+                
                 self.env['bus.bus']._sendone(
                     self.env.user.partner_id, 
                     'notification', 
                     {
-                        'type': 'warning',
+                        'type': notification_type,
+                        'title': "Google Drive Upload",
+                        'message': message,
+                        'sticky': sticky,
+                    }
+                )
+                
+            except Exception as e:
+                # Log the error
+                message = f"Failed to upload invoices to Google Drive: {str(e)}"
+                self.env['bus.bus']._sendone(
+                    self.env.user.partner_id, 
+                    'notification', 
+                    {
+                        'type': 'danger',
                         'title': "Google Drive Upload",
                         'message': message,
                         'sticky': True,
                     }
                 )
+        else:
+            # Show message that auto_database_backup module is not installed
+            self.env['bus.bus']._sendone(
+                self.env.user.partner_id, 
+                'notification', 
+                {
+                    'type': 'warning',
+                    'title': "Google Drive Upload",
+                    'message': "auto_database_backup module is not installed. Cannot upload to Google Drive.",
+                    'sticky': True,
+                }
+            )
         
-        
-        # Return action to download the attachment
+        # Return a simple notification action instead of download
         return {
-            'type': 'ir.actions.act_url',
-            'url': f'/web/content/{attachment.id}?download=true',
-            'target': 'self',
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': 'Invoice Upload',
+                'message': 'Invoice upload process completed. Check notifications for details.',
+                'type': 'info',
+                'sticky': False,
+            }
         }
     
     def action_bulk_confirm_invoices(self):
