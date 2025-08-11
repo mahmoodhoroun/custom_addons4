@@ -1,7 +1,7 @@
 {
     'name': 'Custom Feature',
     'version': '1.0',
-    'depends': ['base', 'stock', 'sale', 'purchase', 'product', 'shipping_integration', 'shipsy_shipping_connector', 'account'],  # Include other dependencies as needed
+    'depends': ['base', 'stock', 'sale', 'purchase', 'product', 'shipping_integration', 'shipsy_shipping_connector', 'account', 'whatsapp'],  # Include other dependencies as needed
     'data': [
         # Add your XML files here if any
         'security/ir.model.access.csv',
@@ -18,6 +18,7 @@
         'wizards/invoice_confirm_wizard_view.xml',
         'views/account_move_view.xml',
         'views/res_users_views.xml',
+        'views/res_config_settings_views.xml',
         'reports/picking_labels.xml',
     ],
     'installable': True,

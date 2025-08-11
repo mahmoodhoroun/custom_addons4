@@ -39,5 +39,60 @@ class StockPicking(models.Model):
 
             if weight >= 5:
                 self.action_send_to_shipsy()
+                # Send WhatsApp message using Chronodiali template for heavy packages
+                self._send_delivery_whatsapp_message('chronodiali')
             else:
                 self.call_shipping_api()
+                # Send WhatsApp message using Cathedis template for light packages
+                self._send_delivery_whatsapp_message('cathedis')
+    
+    def _send_delivery_whatsapp_message(self, template_type):
+        """
+        Send WhatsApp message to customer when delivery shipping is created.
+        
+        Args:
+            template_type (str): Either 'cathedis' or 'chronodiali' to determine which template to use
+        """
+        try:
+            # Determine which template to use based on template_type
+            if template_type == 'chronodiali':
+                config_param = 'custom_features.chronodiali_whatsapp_template'
+                template_name = 'Chronodiali'
+            else:  # cathedis
+                config_param = 'custom_features.cathedis_whatsapp_template'
+                template_name = 'Cathedis'
+            
+            # Get the WhatsApp template from settings
+            template_id = int(self.env['ir.config_parameter'].sudo().get_param(config_param) or 0)
+            
+            if not template_id:
+                _logger.info("No %s WhatsApp template configured in settings", template_name)
+                return
+            
+            template = self.env['whatsapp.template'].browse(template_id)
+            if not template.exists():
+                _logger.warning("Configured %s WhatsApp template (ID: %s) does not exist", template_name, template_id)
+                return
+            
+            # Check if customer has a phone number
+            phone_number = self.partner_id.mobile or self.partner_id.phone
+            if not phone_number:
+                _logger.info("Customer %s has no phone number, skipping WhatsApp message", self.partner_id.name)
+                return
+            
+            # Create WhatsApp composer to send the message
+            composer = self.env['whatsapp.composer'].create({
+                'res_model': 'stock.picking',
+                'res_ids': str([self.id]),
+                'wa_template_id': template.id,
+                'phone': phone_number,
+            })
+            
+            # Send the message
+            composer._send_whatsapp_template()
+            _logger.info("%s WhatsApp delivery message sent to customer %s for picking %s", 
+                        template_name, self.partner_id.name, self.name)
+            
+        except Exception as e:
+            _logger.error("Failed to send %s WhatsApp delivery message for picking %s: %s", 
+                         template_name, self.name, str(e))

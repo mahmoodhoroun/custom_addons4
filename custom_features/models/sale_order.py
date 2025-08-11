@@ -98,6 +98,17 @@ class SaleOrder(models.Model):
             incoming_receipts = order.receipt_ids.filtered(lambda p: p.picking_type_id.code == 'incoming')
             order.receipt_count = len(incoming_receipts)
 
+    @api.model_create_multi
+    def create(self, vals_list):
+        """Override create to send WhatsApp message when sale order is created"""
+        orders = super(SaleOrder, self).create(vals_list)
+        
+        # Send WhatsApp message for each created order
+        for order in orders:
+            order._send_quotation_whatsapp_message()
+        
+        return orders
+
     def action_confirm(self):
         # First handle standard confirmation to create initial deliveries
         res = super(SaleOrder, self).action_confirm()
@@ -261,3 +272,41 @@ class SaleOrder(models.Model):
                     # Confirm the new picking to make it ready
                     if new_picking.state == 'draft':
                         new_picking.action_confirm()
+    
+    def _send_quotation_whatsapp_message(self):
+        """
+        Send WhatsApp message to customer when sale order is confirmed using the configured template.
+        """
+        try:
+            # Get the WhatsApp template from settings
+            template_id = int(self.env['ir.config_parameter'].sudo().get_param('custom_features.quotation_whatsapp_template') or 0)
+            
+            if not template_id:
+                _logger.info("No quotation WhatsApp template configured in settings")
+                return
+            
+            template = self.env['whatsapp.template'].browse(template_id)
+            if not template.exists():
+                _logger.warning("Configured quotation WhatsApp template (ID: %s) does not exist", template_id)
+                return
+            
+            # Check if customer has a phone number
+            phone_number = self.partner_id.mobile or self.partner_id.phone
+            if not phone_number:
+                _logger.info("Customer %s has no phone number, skipping WhatsApp message", self.partner_id.name)
+                return
+            
+            # Create WhatsApp composer to send the message
+            composer = self.env['whatsapp.composer'].create({
+                'res_model': 'sale.order',
+                'res_ids': str([self.id]),
+                'wa_template_id': template.id,
+                'phone': phone_number,
+            })
+            
+            # Send the message
+            composer._send_whatsapp_template()
+            _logger.info("WhatsApp quotation message sent to customer %s for order %s", self.partner_id.name, self.name)
+            
+        except Exception as e:
+            _logger.error("Failed to send WhatsApp quotation message for order %s: %s", self.name, str(e))
