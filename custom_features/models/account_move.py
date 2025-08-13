@@ -7,9 +7,13 @@ import zipfile
 import requests
 from werkzeug import urls
 from datetime import timedelta
+import logging
+import threading
 
 class AccountMove(models.Model):
     _inherit = 'account.move'
+    
+    _logger = logging.getLogger(__name__)
 
     customer_phone = fields.Char(string='Customer Phone', compute='_compute_customer_phone')
     
@@ -79,90 +83,12 @@ class AccountMove(models.Model):
             return {'error': f'Unexpected error: {str(e)}'}
 
     def action_print_invoices_pdf(self):
-        """Print selected invoices as individual PDF files and upload them to Google Drive"""
+        """Queue selected invoices for PDF generation and Google Drive upload"""
         if not self:
             raise ValidationError(_('Please select at least one invoice to print.'))
         
         # Check if auto_database_backup module is installed
-        if self.env['ir.module.module'].sudo().search([('name', '=', 'auto_database_backup'), ('state', '=', 'installed')]):
-            # Try to upload to Google Drive
-            try:
-                # Find Google Drive configurations with tokens
-                backup_config = self.env['db.backup.configure'].search([
-                    ('backup_destination', '=', 'google_drive'),
-                    ('gdrive_refresh_token', '!=', False),  # Check for refresh token instead of computed field
-                    ('google_drive_folder_key', '!=', False)
-                ], limit=1)
-                
-                if not backup_config:
-                    raise ValidationError("No valid Google Drive configuration found")
-                
-                uploaded_files = []
-                failed_uploads = []
-                
-                # Upload each invoice PDF individually
-                for invoice in self:
-                    try:
-                        # Generate PDF report for each invoice
-                        pdf_content, _ = self.env['ir.actions.report']._render_qweb_pdf(
-                            'account.account_invoices', invoice.ids
-                        )
-                        
-                        # Create filename with timestamp
-                        timestamp = fields.Datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-                        filename = f"Invoice_{invoice.name.replace('/', '_')}_{timestamp}.pdf"
-                        
-                        # Upload to Google Drive
-                        drive_response = self._upload_to_google_drive(pdf_content, filename, backup_config, 'application/pdf')
-                        
-                        # Check if there was an error
-                        if drive_response and 'error' in drive_response:
-                            failed_uploads.append(f"{invoice.name}: {drive_response['error']}")
-                        else:
-                            uploaded_files.append(invoice.name)
-                            
-                    except Exception as e:
-                        failed_uploads.append(f"{invoice.name}: {str(e)}")
-                
-                # Show summary notification
-                if uploaded_files and not failed_uploads:
-                    message = f"Successfully uploaded {len(uploaded_files)} invoice(s) to Google Drive"
-                    notification_type = 'success'
-                    sticky = False
-                elif uploaded_files and failed_uploads:
-                    message = f"Uploaded {len(uploaded_files)} invoice(s) successfully. Failed: {len(failed_uploads)}"
-                    notification_type = 'warning'
-                    sticky = True
-                else:
-                    message = f"Failed to upload all {len(failed_uploads)} invoice(s) to Google Drive"
-                    notification_type = 'danger'
-                    sticky = True
-                
-                self.env['bus.bus']._sendone(
-                    self.env.user.partner_id, 
-                    'notification', 
-                    {
-                        'type': notification_type,
-                        'title': "Google Drive Upload",
-                        'message': message,
-                        'sticky': sticky,
-                    }
-                )
-                
-            except Exception as e:
-                # Log the error
-                message = f"Failed to upload invoices to Google Drive: {str(e)}"
-                self.env['bus.bus']._sendone(
-                    self.env.user.partner_id, 
-                    'notification', 
-                    {
-                        'type': 'danger',
-                        'title': "Google Drive Upload",
-                        'message': message,
-                        'sticky': True,
-                    }
-                )
-        else:
+        if not self.env['ir.module.module'].sudo().search([('name', '=', 'auto_database_backup'), ('state', '=', 'installed')]):
             # Show message that auto_database_backup module is not installed
             self.env['bus.bus']._sendone(
                 self.env.user.partner_id, 
@@ -174,18 +100,156 @@ class AccountMove(models.Model):
                     'sticky': True,
                 }
             )
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'title': 'Invoice Upload',
+                    'message': 'Cannot upload invoices: auto_database_backup module not installed.',
+                    'type': 'warning',
+                    'sticky': False,
+                }
+            }
         
-        # Return a simple notification action instead of download
+        # Find Google Drive configurations with tokens
+        backup_config = self.env['db.backup.configure'].search([
+            ('backup_destination', '=', 'google_drive'),
+            ('gdrive_refresh_token', '!=', False),
+            ('google_drive_folder_key', '!=', False)
+        ], limit=1)
+        
+        if not backup_config:
+            raise ValidationError("No valid Google Drive configuration found")
+        
+        # Queue the upload process in background
+        invoice_ids = self.ids
+        user_id = self.env.user.id
+        partner_id = self.env.user.partner_id.id
+        
+        # Start the background process
+        self.env['account.move']._process_invoice_uploads_async(invoice_ids, backup_config.id, user_id, partner_id)
+        
+        # Show immediate notification that process has started
+        self.env['bus.bus']._sendone(
+            self.env.user.partner_id, 
+            'notification', 
+            {
+                'type': 'info',
+                'title': "Google Drive Upload",
+                'message': f"Started uploading {len(self)} invoice(s) to Google Drive in background. You will be notified when complete.",
+                'sticky': False,
+            }
+        )
+        
         return {
             'type': 'ir.actions.client',
             'tag': 'display_notification',
             'params': {
                 'title': 'Invoice Upload',
-                'message': 'Invoice upload process completed. Check notifications for details.',
-                'type': 'info',
+                'message': f'Queued {len(self)} invoice(s) for upload. Process running in background.',
+                'type': 'success',
                 'sticky': False,
             }
         }
+    
+    @api.model
+    def _process_invoice_uploads_async(self, invoice_ids, backup_config_id, user_id, partner_id):
+        """Process invoice uploads asynchronously in background"""
+        
+        def upload_invoices():
+            try:
+                # Create new environment for the thread
+                with self.pool.cursor() as new_cr:
+                    new_env = api.Environment(new_cr, user_id, {})
+                    
+                    # Get records in new environment
+                    invoices = new_env['account.move'].browse(invoice_ids)
+                    backup_config = new_env['db.backup.configure'].browse(backup_config_id)
+                    partner = new_env['res.partner'].browse(partner_id)
+                    
+                    uploaded_files = []
+                    failed_uploads = []
+                    
+                    # Process each invoice
+                    for invoice in invoices:
+                        try:
+                            # Generate PDF report for each invoice
+                            pdf_content, _ = new_env['ir.actions.report']._render_qweb_pdf(
+                                'account.account_invoices', invoice.ids
+                            )
+                            
+                            # Create filename with timestamp
+                            timestamp = fields.Datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+                            filename = f"Invoice_{invoice.name.replace('/', '_')}_{timestamp}.pdf"
+                            
+                            # Upload to Google Drive
+                            drive_response = invoice._upload_to_google_drive(
+                                pdf_content, filename, backup_config, 'application/pdf'
+                            )
+                            
+                            # Check if there was an error
+                            if drive_response and 'error' in drive_response:
+                                failed_uploads.append(f"{invoice.name}: {drive_response['error']}")
+                            else:
+                                uploaded_files.append(invoice.name)
+                                
+                        except Exception as e:
+                            failed_uploads.append(f"{invoice.name}: {str(e)}")
+                    
+                    # Commit the transaction
+                    new_cr.commit()
+                    
+                    # Send completion notification
+                    if uploaded_files and not failed_uploads:
+                        message = f"Successfully uploaded {len(uploaded_files)} invoice(s) to Google Drive"
+                        notification_type = 'success'
+                        sticky = False
+                    elif uploaded_files and failed_uploads:
+                        message = f"Uploaded {len(uploaded_files)} invoice(s) successfully. Failed: {len(failed_uploads)}"
+                        notification_type = 'warning'
+                        sticky = True
+                    else:
+                        message = f"Failed to upload all {len(failed_uploads)} invoice(s) to Google Drive"
+                        notification_type = 'danger'
+                        sticky = True
+                    
+                    new_env['bus.bus']._sendone(
+                        partner,
+                        'notification',
+                        {
+                            'type': notification_type,
+                            'title': "Google Drive Upload Complete",
+                            'message': message,
+                            'sticky': sticky,
+                        }
+                    )
+                    
+            except Exception as e:
+                # Handle any unexpected errors
+                try:
+                    with self.pool.cursor() as error_cr:
+                        error_env = api.Environment(error_cr, user_id, {})
+                        partner = error_env['res.partner'].browse(partner_id)
+                        
+                        error_env['bus.bus']._sendone(
+                            partner,
+                            'notification',
+                            {
+                                'type': 'danger',
+                                'title': "Google Drive Upload Error",
+                                'message': f"Failed to upload invoices: {str(e)}",
+                                'sticky': True,
+                            }
+                        )
+                        error_cr.commit()
+                except:
+                    # If even error notification fails, log it
+                    logging.getLogger(__name__).error(f"Failed to upload invoices and send error notification: {str(e)}")
+        
+        # Start the upload process in a separate thread
+        upload_thread = threading.Thread(target=upload_invoices)
+        upload_thread.daemon = True
+        upload_thread.start()
     
     def action_bulk_confirm_invoices(self):
         use_wizard = self.env.context.get('default_use_wizard')
