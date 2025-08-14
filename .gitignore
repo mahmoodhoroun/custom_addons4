@@ -25,4 +25,9 @@ build/
 
 # Odoo specific
 
-.DS_Store
+.DS_Store**/firebase-key/*.json
+*.pem
+*.p12
+*.pfx
+*.key
+
