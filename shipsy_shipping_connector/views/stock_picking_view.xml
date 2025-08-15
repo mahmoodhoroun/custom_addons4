@@ -61,8 +61,6 @@
                 <attribute name="decoration-muted">state == 'cancel'</attribute>
             </xpath>
             <xpath expr="//header" position="inside">
-                <!-- <button name="action_send_multiple_to_shipsy" type="object" string="Livraison Chrono" class="btn-primary"/>
-                <button name="%(shipsy_shipping_connector.action_shipsy_pickup_wizard)d" type="action" string="Ramassage Chrono" class="btn-primary"/> -->
                 <button name="action_print_multiple_shipsy_labels" type="object" string="Etiquettes Chrono" class="btn-primary"/>
             </xpath>
         </field>
